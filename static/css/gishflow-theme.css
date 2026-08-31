@@ -1,0 +1,342 @@
+/* ==========================================================================
+   GishFlow theme — a minimal, Apple-inspired restyle layered over Gophish's
+   Bootstrap 3 UI. Pure override: no markup or JS changes, so all existing
+   functionality keeps working. Loaded AFTER gophish.css in base.html.
+   ========================================================================== */
+
+:root{
+  --gf-ground:#FBFBFD; --gf-surface:#FFFFFF; --gf-surface-2:#F5F5F7; --gf-surface-3:#EDEDF0;
+  --gf-text:#1D1D1F; --gf-text-2:#6E6E73; --gf-text-3:#86868B;
+  --gf-hairline:#E5E5E8; --gf-hairline-2:#D2D2D7;
+  --gf-accent:#0071E3; --gf-accent-hover:#0077ED; --gf-accent-soft:rgba(0,113,227,.10);
+  --gf-green:#30D158; --gf-amber:#FF9F0A; --gf-red:#FF3B30; --gf-qr:#5E5CE6;
+  --gf-shadow:0 1px 2px rgba(0,0,0,.05), 0 6px 22px rgba(0,0,0,.045);
+  --gf-shadow-lg:0 12px 48px rgba(0,0,0,.16);
+  --gf-r:12px; --gf-r-sm:8px; --gf-pill:980px;
+  --gf-font:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display",Inter,"Segoe UI","Helvetica Neue",Arial,sans-serif;
+}
+
+/* ---------- Base ---------- */
+body{
+  font-family:var(--gf-font)!important;
+  background:var(--gf-ground)!important; color:var(--gf-text)!important;
+  -webkit-font-smoothing:antialiased; font-size:15px; letter-spacing:-.01em;
+}
+a{color:var(--gf-accent)}
+a:hover,a:focus{color:var(--gf-accent-hover); text-decoration:none}
+hr{border-color:var(--gf-hairline)}
+::selection{background:var(--gf-accent-soft)}
+h1,h2,h3,h4,h5{font-family:var(--gf-font); letter-spacing:-.02em; color:var(--gf-text)}
+
+/* ---------- Top navbar ---------- */
+.navbar-inverse{
+  background:rgba(251,251,253,.8)!important; backdrop-filter:saturate(180%) blur(20px);
+  -webkit-backdrop-filter:saturate(180%) blur(20px);
+  border:0!important; border-bottom:1px solid var(--gf-hairline)!important; box-shadow:none!important;
+  min-height:56px;
+}
+.navbar-inverse .navbar-brand{color:var(--gf-text)!important; font-weight:700; letter-spacing:-.02em; font-size:19px}
+.navbar-logo{height:24px; margin-top:16px; filter:grayscale(1) brightness(.35)}
+.navbar-inverse .navbar-nav>li>a{color:var(--gf-text-2)!important}
+.navbar-inverse .btn-primary,
+.navbar-inverse #navbar-dropdown .btn{
+  background:var(--gf-surface)!important; color:var(--gf-text)!important;
+  border:1px solid var(--gf-hairline-2)!important; border-radius:var(--gf-pill)!important; box-shadow:none!important;
+}
+.navbar-inverse #navbar-dropdown .btn:hover{background:var(--gf-surface-2)!important}
+
+/* ---------- Sidebar ---------- */
+.sidebar{
+  background:var(--gf-surface); border-right:1px solid var(--gf-hairline);
+  padding-top:74px!important; box-shadow:none;
+}
+.nav-sidebar{margin-right:0}
+.nav-sidebar>li>a{
+  color:var(--gf-text-2); font-size:14px; font-weight:500; padding:9px 16px;
+  border-radius:var(--gf-r-sm); margin:1px 10px; transition:background .15s,color .15s;
+}
+.nav-sidebar>li>a:hover,.nav-sidebar>li>a:focus{background:var(--gf-surface-2); color:var(--gf-text)}
+.nav-sidebar>.active>a,.nav-sidebar>.active>a:hover,.nav-sidebar>.active>a:focus{
+  background:var(--gf-accent-soft)!important; color:var(--gf-accent)!important; font-weight:600;
+}
+.nav-sidebar>li>hr{margin:10px 20px; border-color:var(--gf-hairline)}
+.nav-badge.badge{background:var(--gf-surface-3); color:var(--gf-text-2); font-weight:600; border-radius:var(--gf-pill)}
+
+/* ---------- Page header ---------- */
+.main{padding-top:74px!important}
+.page-header{
+  border-bottom:1px solid var(--gf-hairline); padding-bottom:16px; margin:10px 0 24px;
+  font-size:28px; font-weight:700; letter-spacing:-.03em;
+}
+
+/* ---------- Buttons ---------- */
+.btn{
+  font-family:var(--gf-font); font-weight:600; font-size:14px; border-radius:var(--gf-pill);
+  padding:8px 18px; border:1px solid transparent; box-shadow:none!important;
+  transition:background .15s,border-color .15s,transform .06s,color .15s;
+}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--gf-accent); border-color:var(--gf-accent); color:#fff}
+.btn-primary:hover,.btn-primary:focus,.btn-primary:active{background:var(--gf-accent-hover)!important; border-color:var(--gf-accent-hover)!important}
+.btn-default{background:var(--gf-surface); border-color:var(--gf-hairline-2); color:var(--gf-text)}
+.btn-default:hover,.btn-default:focus{background:var(--gf-surface-2); border-color:var(--gf-hairline-2); color:var(--gf-text)}
+.btn-success{background:var(--gf-green); border-color:var(--gf-green); color:#fff}
+.btn-danger{background:var(--gf-red); border-color:var(--gf-red); color:#fff}
+.btn-warning{background:var(--gf-amber); border-color:var(--gf-amber); color:#fff}
+.btn-xs{padding:4px 10px; font-size:12px}
+.btn-sm{padding:6px 13px; font-size:13px}
+
+/* ---------- Cards / panels / wells ---------- */
+.panel,.well{
+  background:var(--gf-surface); border:1px solid var(--gf-hairline)!important;
+  border-radius:var(--gf-r)!important; box-shadow:var(--gf-shadow)!important;
+}
+.panel-heading{background:transparent!important; border-bottom:1px solid var(--gf-hairline)!important; font-weight:600; padding:14px 18px; border-radius:var(--gf-r) var(--gf-r) 0 0!important}
+.panel-body{padding:18px}
+.panel-default>.panel-heading{color:var(--gf-text)}
+
+/* ---------- Tables ---------- */
+.table{background:var(--gf-surface); border-radius:var(--gf-r); overflow:hidden}
+.table>thead>tr>th{
+  border-bottom:1px solid var(--gf-hairline)!important; color:var(--gf-text-3);
+  font-size:11px; text-transform:uppercase; letter-spacing:.04em; font-weight:600; padding:12px 16px;
+}
+.table>tbody>tr>td{border-top:1px solid var(--gf-hairline)!important; padding:13px 16px; vertical-align:middle; color:var(--gf-text)}
+.table-hover>tbody>tr:hover{background:var(--gf-surface-2)}
+.table-striped>tbody>tr:nth-of-type(odd){background:var(--gf-surface-2)}
+
+/* DataTables chrome */
+.dataTables_wrapper .dataTables_filter input,
+.dataTables_wrapper .dataTables_length select{
+  border:1px solid var(--gf-hairline)!important; border-radius:var(--gf-r-sm); background:var(--gf-surface-2); padding:6px 10px; color:var(--gf-text);
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button{border-radius:var(--gf-r-sm)!important; border:0!important; color:var(--gf-text-2)!important}
+.dataTables_wrapper .dataTables_paginate .paginate_button.current{background:var(--gf-accent)!important; color:#fff!important}
+.dataTables_wrapper .dataTables_info{color:var(--gf-text-3)}
+
+/* ---------- Forms ---------- */
+.form-control{
+  font-family:var(--gf-font); font-size:14px; color:var(--gf-text);
+  background:var(--gf-surface-2); border:1px solid var(--gf-hairline);
+  border-radius:var(--gf-r-sm); box-shadow:none; height:auto; padding:9px 12px;
+}
+.form-control:focus{border-color:var(--gf-accent); box-shadow:0 0 0 3px var(--gf-accent-soft); background:var(--gf-surface)}
+.control-label,label{font-weight:600; color:var(--gf-text-2); font-size:13px}
+textarea.form-control{line-height:1.6}
+.input-group-addon{background:var(--gf-surface-2); border:1px solid var(--gf-hairline); border-radius:var(--gf-r-sm); color:var(--gf-text-2)}
+
+/* select2 */
+.select2-container--default .select2-selection--single,
+.select2-container--default .select2-selection--multiple{
+  background:var(--gf-surface-2); border:1px solid var(--gf-hairline)!important; border-radius:var(--gf-r-sm)!important; min-height:38px;
+}
+.select2-container--default .select2-selection--single .select2-selection__rendered{line-height:36px; color:var(--gf-text)}
+.select2-container--default .select2-selection--single .select2-selection__arrow{height:36px}
+.select2-dropdown{border:1px solid var(--gf-hairline); border-radius:var(--gf-r-sm); box-shadow:var(--gf-shadow-lg)}
+.select2-container--default .select2-results__option--highlighted[aria-selected]{background:var(--gf-accent)}
+.select2-container--default .select2-selection--multiple .select2-selection__choice{background:var(--gf-accent-soft); border:0; color:var(--gf-accent); border-radius:var(--gf-r-sm)}
+
+/* ---------- Modals ---------- */
+.modal-content{border:1px solid var(--gf-hairline); border-radius:var(--gf-r); box-shadow:var(--gf-shadow-lg)}
+.modal-header{border-bottom:1px solid var(--gf-hairline); padding:18px 20px}
+.modal-title{font-weight:700; letter-spacing:-.02em}
+.modal-body{padding:20px}
+.modal-footer{border-top:1px solid var(--gf-hairline); padding:16px 20px}
+.modal-backdrop.in{opacity:.32}
+.modal-header .close{opacity:.4; font-weight:400}
+
+/* ---------- Alerts ---------- */
+.alert{border-radius:var(--gf-r); border:1px solid transparent; font-size:14px; padding:13px 16px}
+.alert-info{background:var(--gf-accent-soft); color:var(--gf-accent); border-color:transparent}
+.alert-success{background:rgba(48,209,88,.14); color:#248A3D; border-color:transparent}
+.alert-danger{background:rgba(255,59,48,.12); color:#C4271E; border-color:transparent}
+.alert-warning{background:rgba(255,159,10,.14); color:#B26A00; border-color:transparent}
+
+/* ---------- Labels / badges (status pills) ---------- */
+.label{font-size:12px; font-weight:600; padding:4px 10px; border-radius:var(--gf-pill); letter-spacing:-.01em}
+.label-success{background:rgba(48,209,88,.16); color:#248A3D}
+.label-primary{background:var(--gf-accent-soft); color:var(--gf-accent)}
+.label-info{background:rgba(10,132,255,.14); color:#0A84FF}
+.label-warning{background:rgba(255,159,10,.16); color:#B26A00}
+.label-danger{background:rgba(255,59,48,.14); color:#C4271E}
+.label-default{background:var(--gf-surface-3); color:var(--gf-text-2)}
+.badge{background:var(--gf-surface-3); color:var(--gf-text-2); font-weight:600}
+
+/* ---------- Tabs (used in campaign results / editors) ---------- */
+.nav-tabs{border-bottom:1px solid var(--gf-hairline)}
+.nav-tabs>li>a{border:0; color:var(--gf-text-2); font-weight:500; border-radius:0; margin-right:4px}
+.nav-tabs>li>a:hover{background:transparent; color:var(--gf-text); border-bottom:2px solid var(--gf-hairline-2)}
+.nav-tabs>li.active>a,.nav-tabs>li.active>a:hover,.nav-tabs>li.active>a:focus{
+  border:0; border-bottom:2px solid var(--gf-accent); color:var(--gf-accent); font-weight:600; background:transparent;
+}
+
+/* ---------- Misc ---------- */
+#loading .fa-spinner{color:var(--gf-accent)}
+.tooltip-inner{background:var(--gf-text); border-radius:var(--gf-r-sm); font-size:12px; padding:6px 10px}
+code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{background:var(--gf-surface-2); border:1px solid var(--gf-hairline); border-radius:var(--gf-r-sm)}
+.checkbox label,.radio label{color:var(--gf-text)}
+
+/* keyboard focus visibility */
+a:focus-visible,button:focus-visible,.btn:focus-visible,.form-control:focus-visible{outline:2px solid var(--gf-accent); outline-offset:2px}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* ==========================================================================
+   Dashboard page tuning + brand wordmark
+   ========================================================================== */
+:root{ --gf-sent:#8E8E93; --gf-opened:#0A84FF; --gf-clicked:#FF9F0A; }
+
+/* Brand: hide the old fish logo, show a clean GishFlow wordmark with a mark */
+.navbar-logo{display:none!important}
+.navbar-inverse .navbar-brand{
+  display:inline-flex; align-items:center; gap:9px; padding-left:16px;
+  font-size:19px; font-weight:700; letter-spacing:-.02em; color:var(--gf-text)!important;
+}
+.navbar-inverse .navbar-brand::before{
+  content:""; width:20px; height:20px; border-radius:6px;
+  background:linear-gradient(150deg,var(--gf-accent),var(--gf-qr));
+  box-shadow:0 2px 8px var(--gf-accent-soft); flex:none;
+}
+
+/* Cards */
+.gf-card{margin-bottom:20px}
+.panel-heading{display:flex; align-items:center}
+.panel-heading .gf-sub{color:var(--gf-text-3); font-weight:500; font-size:12px; margin-left:10px}
+.panel-heading .btn{margin-left:auto}
+
+/* Funnel stat cards */
+.gf-stat-row{display:flex; flex-wrap:wrap; gap:16px; margin-bottom:20px}
+.gf-stat{
+  flex:1 1 150px; background:var(--gf-surface); border:1px solid var(--gf-hairline);
+  border-radius:var(--gf-r); box-shadow:var(--gf-shadow); padding:14px 14px 8px;
+}
+.gf-stat-head{font-size:13px; font-weight:600; color:var(--gf-text-2); display:flex; align-items:center; gap:8px; margin-bottom:2px}
+.gf-dot{width:9px; height:9px; border-radius:50%; display:inline-block; flex:none}
+
+/* Chartist polish */
+.ct-label{fill:var(--gf-text-3); color:var(--gf-text-3); font-family:var(--gf-font); font-size:12px; opacity:.9}
+.ct-grid{stroke:var(--gf-hairline); stroke-dasharray:2px; stroke-width:1px}
+.ct-line{stroke-width:2.5px}
+.ct-point{stroke-width:8px}
+.ct-area{fill-opacity:.10}
+.ct-series-a .ct-line,.ct-series-a .ct-point,.ct-series-a .ct-area{stroke:var(--gf-accent); fill:var(--gf-accent)}
+
+/* Donut ring colors per stat (value + faint track) */
+.gf-donut .ct-series-b .ct-slice-donut{stroke:var(--gf-surface-3)!important}
+#sent_chart .ct-series-a .ct-slice-donut{stroke:var(--gf-sent)!important}
+#opened_chart .ct-series-a .ct-slice-donut{stroke:var(--gf-opened)!important}
+#clicked_chart .ct-series-a .ct-slice-donut{stroke:var(--gf-clicked)!important}
+#submitted_data_chart .ct-series-a .ct-slice-donut{stroke:var(--gf-red)!important}
+#email_reported_chart .ct-series-a .ct-slice-donut{stroke:var(--gf-green)!important}
+.gf-donut .ct-label{font-size:15px; font-weight:700; fill:var(--gf-text)}
+
+@media (max-width:1100px){ .gf-stat{flex-basis:calc(33% - 16px)} }
+@media (max-width:700px){ .gf-stat{flex-basis:calc(50% - 16px)} }
+
+/* ==========================================================================
+   Email Templates page — variable/QR helper, editor chrome, toolbar
+   ========================================================================== */
+.gf-var-note{
+  display:flex; gap:12px; padding:12px 14px; margin:4px 0 16px; border-radius:var(--gf-r);
+  background:linear-gradient(135deg,var(--gf-accent-soft),rgba(94,92,230,.08));
+  border:1px solid var(--gf-hairline); font-size:13px; line-height:1.5;
+}
+.gf-var-ico{
+  width:34px; height:34px; border-radius:9px; flex:none; font-size:16px;
+  background:linear-gradient(150deg,var(--gf-accent),var(--gf-qr)); color:#fff;
+  display:flex; align-items:center; justify-content:center;
+}
+.gf-var-note b{font-weight:600; color:var(--gf-text)}
+.gf-var-note small{display:block; color:var(--gf-text-2); margin-top:8px}
+.gf-var-chips{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px}
+.gf-var-note code{
+  font-size:12px; padding:2px 8px; border-radius:6px; color:var(--gf-text-2);
+  background:var(--gf-surface); border:1px solid var(--gf-hairline);
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+.gf-var-note code.qr{background:rgba(94,92,230,.12); color:var(--gf-qr); border-color:transparent; font-weight:600}
+
+/* CKEditor + plain editor chrome */
+.cke_chrome{border:1px solid var(--gf-hairline)!important; border-radius:var(--gf-r-sm)!important; overflow:hidden; box-shadow:none!important}
+.cke_top,.cke_bottom{background:var(--gf-surface-2)!important; border-color:var(--gf-hairline)!important}
+.gophish-editor,textarea#html_editor,textarea#email_content{
+  border:1px solid var(--gf-hairline)!important; border-radius:var(--gf-r-sm)!important; background:var(--gf-surface-2);
+}
+.CodeMirror{border:1px solid var(--gf-hairline)!important; border-radius:var(--gf-r-sm)!important; font-family:ui-monospace,Menlo,Consolas,monospace}
+
+/* File-upload button + attachments table spacing */
+.btn-file{position:relative; overflow:hidden}
+#attachmentsTable{margin-top:14px}
+
+/* List page toolbar: turn the top button row into a clean action bar */
+.main .page-header{margin-bottom:20px}
+.main>.row>.btn-primary:first-child,
+.main #flashes+.row .btn-primary{margin-bottom:6px}
+
+/* ==========================================================================
+   Landing Pages page — compact variable hint + capture settings emphasis
+   ========================================================================== */
+.gf-hint{
+  display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--gf-text-2);
+  background:var(--gf-surface-2); border:1px solid var(--gf-hairline);
+  border-radius:var(--gf-r-sm); padding:8px 12px; margin:4px 0 14px;
+}
+.gf-hint .fa{color:var(--gf-accent)}
+.gf-hint code{
+  font-size:12px; padding:1px 7px; border-radius:5px; color:var(--gf-text-2);
+  background:var(--gf-surface); border:1px solid var(--gf-hairline);
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+.gf-hint code.qr{background:rgba(94,92,230,.12); color:var(--gf-qr); border-color:transparent; font-weight:600}
+
+/* Password-capture warning reads as a clear caution block */
+#capture_passwords .alert-warning{margin-top:10px; font-size:12.5px}
+
+/* ==========================================================================
+   Campaigns page + shared modal form rhythm
+   ========================================================================== */
+/* Comfortable vertical rhythm for stacked fields inside modals */
+.modal-body .control-label{margin-top:14px; display:inline-block}
+.modal-body>.form-group:first-child>.control-label:first-child,
+.modal-body .form-group>label:first-child{margin-top:0}
+
+/* Attached input + button (e.g. Sending Profile + Send Test Email): fix pill radius */
+.input-group .form-control{border-radius:var(--gf-r-sm) 0 0 var(--gf-r-sm)}
+.input-group-btn .btn{border-radius:0 var(--gf-r-sm) var(--gf-r-sm) 0!important; padding-left:14px; padding-right:14px}
+.input-group .select2-container{border-radius:var(--gf-r-sm) 0 0 var(--gf-r-sm)}
+
+/* Launch button gets a confident accent; status labels already themed */
+#launchButton .fa-rocket{margin-right:2px}
+/* nav-tabs breathing room above tables/content */
+.nav-tabs{margin-bottom:18px}
+
+/* ==========================================================================
+   Groups / Sending Profiles / Settings
+   ========================================================================== */
+/* Password-strength & generic progress bars */
+.progress{background:var(--gf-surface-3); border-radius:var(--gf-pill); height:8px; box-shadow:none; overflow:hidden; margin-top:8px}
+.progress-bar{background:var(--gf-accent); box-shadow:none; transition:width .3s ease}
+.progress-bar-danger{background:var(--gf-red)!important}
+.progress-bar-warning{background:var(--gf-amber)!important}
+.progress-bar-success{background:var(--gf-green)!important}
+
+/* Link-style buttons (Advanced Settings, etc.) */
+.btn-link{color:var(--gf-accent); font-weight:600; box-shadow:none!important; border:0; padding:6px 4px}
+.btn-link:hover,.btn-link:focus{color:var(--gf-accent-hover); text-decoration:none}
+
+/* Settings: align left-column labels with their inputs */
+.tab-content .control-label.form-label{padding-top:9px; color:var(--gf-text-2)}
+.form-label{font-weight:600}
+.tab-content .row{margin-bottom:2px}
+
+/* Small helper links (Download CSV template) */
+#csv-template{cursor:pointer; margin-left:12px; font-weight:500}
+#csv-template:hover{color:var(--gf-accent)}
+
+/* Inline add-target form (Groups) + custom header row keep tidy heights */
+#targetForm .btn-lg,.btn-headers{padding:9px 16px; font-size:14px}
+#targetsTable,#headersTable{margin-top:14px}
+
+/* API key field reads as a token */
+#api_key{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:13px; letter-spacing:.02em}

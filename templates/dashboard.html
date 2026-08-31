@@ -13,48 +13,55 @@
         </div>
     </div>
     <div id="dashboard" style="display:none;">
-        <div class="row">
-            <div id="overview_chart" style="height:200px;" class="col-lg-12 col-md-12 col-sm-12 col-xs-12"></div>
+
+        <!-- Campaign timeline -->
+        <div class="panel gf-card">
+            <div class="panel-heading">Campaign timeline<span class="gf-sub">events across all campaigns</span></div>
+            <div class="panel-body">
+                <div id="overview_chart" style="height:220px;"></div>
+            </div>
         </div>
-        <div class="row">
-            <div style="height:200px;" class="col-lg-1 col-md-1"></div>
-            <div id="sent_chart" style="height:200px;" class="col-lg-2 col-md-2"></div>
-            <div id="opened_chart" style="height:200px;" class="col-lg-2 col-md-2"></div>
-            <div id="clicked_chart" style="height:200px;" class="col-lg-2 col-md-2"></div>
-            <div id="submitted_data_chart" style="height:200px;" class="col-lg-2 col-md-2"></div>
-            <div id="email_reported_chart" style="height:200px;" class="col-lg-2 col-md-2"></div>
-            <div style="height:200px;" class="col-lg-1 col-md-1"></div>
+
+        <!-- Engagement funnel -->
+        <div class="gf-stat-row">
+            <div class="gf-stat">
+                <div class="gf-stat-head"><span class="gf-dot" style="background:var(--gf-sent)"></span>Sent</div>
+                <div id="sent_chart" class="gf-donut" style="height:170px;"></div>
+            </div>
+            <div class="gf-stat">
+                <div class="gf-stat-head"><span class="gf-dot" style="background:var(--gf-opened)"></span>Opened</div>
+                <div id="opened_chart" class="gf-donut" style="height:170px;"></div>
+            </div>
+            <div class="gf-stat">
+                <div class="gf-stat-head"><span class="gf-dot" style="background:var(--gf-clicked)"></span>Clicked</div>
+                <div id="clicked_chart" class="gf-donut" style="height:170px;"></div>
+            </div>
+            <div class="gf-stat">
+                <div class="gf-stat-head"><span class="gf-dot" style="background:var(--gf-red)"></span>Submitted data</div>
+                <div id="submitted_data_chart" class="gf-donut" style="height:170px;"></div>
+            </div>
+            <div class="gf-stat">
+                <div class="gf-stat-head"><span class="gf-dot" style="background:var(--gf-green)"></span>Reported</div>
+                <div id="email_reported_chart" class="gf-donut" style="height:170px;"></div>
+            </div>
         </div>
-        <div class="row">
-            <h2>Recent Campaigns</h2>
-        </div>
-        <div class="row">
-            <a href="/campaigns">
-                <button type="button" class="btn btn-primary">View All</button>
-            </a>
-        </div>
-        &nbsp;&nbsp;
-        <div class="row">
-            <table id="campaignTable" class="table">
+
+        <!-- Recent campaigns -->
+        <div class="panel gf-card">
+            <div class="panel-heading">
+                Recent campaigns
+                <a href="/campaigns" class="btn btn-default btn-sm pull-right">View all</a>
+            </div>
+            <table id="campaignTable" class="table" style="margin-bottom:0;">
                 <thead>
                     <tr>
                         <th class="col-md-2 col-sm-2">Name</th>
                         <th class="col-md-2 col-sm-2">Created Date</th>
-                        <th class="col-md-1 col-sm-1">
-                            <i class="fa fa-envelope-o"></i>
-                        </th>
-                        <th class="col-md-1 col-sm-1">
-                            <i class="fa fa-envelope-open-o"></i>
-                        </th>
-                        <th class="col-md-1 col-sm-1">
-                            <i class="fa fa-mouse-pointer"></i>
-                        </th>
-                        <th class="col-md-1 col-sm-1">
-                            <i class="fa fa-exclamation-circle"></i>
-                        </th>
-                        <th class="col-md-1 col-sm-1">
-                            <i class="fa fa-bullhorn"></i>
-                        </th>
+                        <th class="col-md-1 col-sm-1" title="Sent"><i class="fa fa-envelope-o"></i></th>
+                        <th class="col-md-1 col-sm-1" title="Opened"><i class="fa fa-envelope-open-o"></i></th>
+                        <th class="col-md-1 col-sm-1" title="Clicked"><i class="fa fa-mouse-pointer"></i></th>
+                        <th class="col-md-1 col-sm-1" title="Submitted data"><i class="fa fa-exclamation-circle"></i></th>
+                        <th class="col-md-1 col-sm-1" title="Reported"><i class="fa fa-bullhorn"></i></th>
                         <th class="col-md-1 col-sm-1">Status</th>
                         <th class="col-md-2 col-sm-2 no-sort"></th>
                     </tr>

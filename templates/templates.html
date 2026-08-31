@@ -51,7 +51,7 @@
                         autofocus />
                 </div>
                 <div class="form-group">
-                    <button class="btn btn-danger" data-toggle="modal" data-backdrop="static" data-target="#importEmailModal"><i
+                    <button class="btn btn-default" data-toggle="modal" data-backdrop="static" data-target="#importEmailModal"><i
                             class="fa fa-envelope"></i>
                         Import Email</button>
                 </div>
@@ -62,6 +62,20 @@
                 <label class="control-label" for="subject">Subject:</label>
                 <div class="form-group">
                     <input type="text" class="form-control" placeholder="Email Subject" id="subject" />
+                </div>
+                <!-- GishFlow: personalization variables + QR (quishing) helper -->
+                <div class="gf-var-note">
+                    <div class="gf-var-ico"><i class="fa fa-qrcode"></i></div>
+                    <div>
+                        <b>Personalization variables</b> — GishFlow fills these in per recipient:
+                        <div class="gf-var-chips">
+                            <code>{{"{{"}}.FirstName{{"}}"}}</code>
+                            <code>{{"{{"}}.URL{{"}}"}}</code>
+                            <code>{{"{{"}}.Tracker{{"}}"}}</code>
+                            <code class="qr">{{"{{"}}.QRCode{{"}}"}}</code>
+                        </div>
+                        <small>Drop <code class="qr">{{"{{"}}.QRCode{{"}}"}}</code> into the HTML body to embed a QR code of the recipient's tracked link (quishing) — scans are logged just like link clicks.</small>
+                    </div>
                 </div>
                 <!-- Nav tabs -->
                 <ul class="nav nav-tabs" role="tablist">
@@ -81,7 +95,7 @@
                     <input id="use_tracker_checkbox" type="checkbox" checked>
                     <label for="use_tracker_checkbox">Add Tracking Image</label>
                 </div>
-                <span class="btn btn-danger btn-file"><i class="fa fa-plus"></i> Add Files
+                <span class="btn btn-default btn-file"><i class="fa fa-plus"></i> Add Files
                     <input id="attachmentUpload" type="file" onchange="attach(this.files)" multiple>
                 </span>
                 <br />
