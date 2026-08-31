@@ -2,10 +2,14 @@ package models
 
 import (
 	"bytes"
+	"encoding/base64"
+	"fmt"
 	"net/mail"
 	"net/url"
 	"path"
 	"text/template"
+
+	qrcode "github.com/skip2/go-qrcode"
 )
 
 // TemplateContext is an interface that allows both campaigns and email
@@ -24,6 +28,7 @@ type PhishingTemplateContext struct {
 	TrackingURL string
 	RId         string
 	BaseURL     string
+	QRCode      string
 	BaseRecipient
 }
 
@@ -61,6 +66,16 @@ func NewPhishingTemplateContext(ctx TemplateContext, r BaseRecipient, rid string
 	trackingURL.Path = path.Join(trackingURL.Path, "/track")
 	trackingURL.RawQuery = q.Encode()
 
+	// Generate a QR code that encodes the recipient's phishing URL. It's
+	// embedded as a self-contained data-URI <img> so templates can simply
+	// reference {{.QRCode}}. Any generation error leaves QRCode empty so a
+	// campaign that doesn't use the QR code is never affected.
+	qrCode := ""
+	if png, qrErr := qrcode.Encode(phishURL.String(), qrcode.Medium, 256); qrErr == nil {
+		qrCode = fmt.Sprintf("<img alt='' src='data:image/png;base64,%s'/>",
+			base64.StdEncoding.EncodeToString(png))
+	}
+
 	return PhishingTemplateContext{
 		BaseRecipient: r,
 		BaseURL:       baseURL.String(),
@@ -69,6 +84,7 @@ func NewPhishingTemplateContext(ctx TemplateContext, r BaseRecipient, rid string
 		Tracker:       "<img alt='' style='display: none' src='" + trackingURL.String() + "'/>",
 		From:          fn,
 		RId:           rid,
+		QRCode:        qrCode,
 	}, nil
 }
 
