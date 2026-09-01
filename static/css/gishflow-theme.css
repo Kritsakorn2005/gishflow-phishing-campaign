@@ -452,3 +452,34 @@ a:focus-visible,button:focus-visible,.btn:focus-visible,.form-control:focus-visi
 .gf-theme-toggle:hover{background:var(--gf-surface-2); color:var(--gf-accent)}
 .gf-theme-toggle:active{transform:scale(.94)}
 @media (max-width:860px){ .gf-corner{left:12px; bottom:12px} }
+
+/* ==========================================================================
+   Risk dashboard
+   ========================================================================== */
+.gf-risk-top{display:grid; grid-template-columns:repeat(3,1fr) 1.4fr; gap:16px; margin-bottom:20px}
+.gf-kpi{padding:18px 20px; margin:0}
+.gf-kpi-label{font-size:12.5px; color:var(--gf-text-2); font-weight:500}
+.gf-kpi-value{font-size:34px; font-weight:700; letter-spacing:-.03em; margin:6px 0 6px; font-variant-numeric:tabular-nums}
+.gf-kpi-sub{font-size:12px; color:var(--gf-text-3)}
+.gf-donut-card{margin:0}
+.gf-donut-wrap{display:flex; align-items:center; gap:18px; padding:14px 18px 18px; flex-wrap:wrap}
+.gf-legend{display:flex; flex-direction:column; gap:9px; font-size:13px}
+.gf-legend .gf-li{display:flex; align-items:center; gap:9px; color:var(--gf-text-2)}
+.gf-legend .gf-li i{width:11px; height:11px; border-radius:3px; display:inline-block}
+.gf-legend .gf-li span{margin-left:auto; font-weight:600; color:var(--gf-text); font-variant-numeric:tabular-nums; padding-left:14px}
+
+.gf-risk-pill{display:inline-block; font-size:12px; font-weight:600; padding:3px 11px; border-radius:var(--gf-pill)}
+.gf-risk-low{background:rgba(48,209,88,.16); color:#248a3d}
+.gf-risk-med{background:rgba(255,159,10,.16); color:#b26a00}
+.gf-risk-high{background:rgba(255,59,48,.14); color:#c4271e}
+.gf-risk-none{background:var(--gf-surface-3); color:var(--gf-text-3)}
+:root[data-theme="dark"] .gf-risk-low{color:#5fe08a}
+:root[data-theme="dark"] .gf-risk-med{color:#ffcf7a}
+:root[data-theme="dark"] .gf-risk-high{color:#ff8a80}
+
+.gf-score{display:flex; align-items:center; gap:9px; min-width:120px}
+.gf-score-track{flex:1; height:6px; border-radius:3px; background:var(--gf-surface-3); overflow:hidden; min-width:60px}
+.gf-score-fill{height:100%; border-radius:3px}
+.gf-score b{font-variant-numeric:tabular-nums; font-weight:600; min-width:26px; text-align:right}
+
+@media (max-width:900px){ .gf-risk-top{grid-template-columns:1fr 1fr} }

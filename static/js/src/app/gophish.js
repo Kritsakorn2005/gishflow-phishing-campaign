@@ -217,6 +217,17 @@ var api = {
             return query("/training/" + id, "DELETE", {}, false)
         }
     },
+    // risk contains the endpoints for /risk
+    risk: {
+        // users() - Queries the API for GET /risk/users
+        users: function () {
+            return query("/risk/users", "GET", {}, false)
+        },
+        // groups() - Queries the API for GET /risk/groups
+        groups: function () {
+            return query("/risk/groups", "GET", {}, false)
+        }
+    },
     // SMTP contains the endpoints for /smtp
     SMTP: {
         // get() - Queries the API for GET /smtp

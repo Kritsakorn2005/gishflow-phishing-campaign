@@ -1,0 +1,84 @@
+{{define "body"}}
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <h1 class="page-header">Risk</h1>
+    <div id="flashes" class="row"></div>
+    <div id="riskLoading">
+        <i class="fa fa-spinner fa-spin fa-4x"></i>
+    </div>
+    <div id="emptyRisk" class="row" style="display:none;">
+        <div class="alert alert-info">
+            No campaign results yet. Launch a campaign and risk scores will build automatically.
+        </div>
+    </div>
+    <div id="riskContent" style="display:none;">
+        <div class="gf-risk-top">
+            <div class="panel gf-kpi">
+                <div class="gf-kpi-label">Average risk</div>
+                <div class="gf-kpi-value" id="kpiAvg">0</div>
+                <div id="kpiAvgLevel"></div>
+            </div>
+            <div class="panel gf-kpi">
+                <div class="gf-kpi-label">High-risk people</div>
+                <div class="gf-kpi-value" id="kpiHigh">0</div>
+                <div class="gf-kpi-sub">need attention</div>
+            </div>
+            <div class="panel gf-kpi">
+                <div class="gf-kpi-label">People scored</div>
+                <div class="gf-kpi-value" id="kpiParticipants">0</div>
+                <div class="gf-kpi-sub">across all campaigns</div>
+            </div>
+            <div class="panel gf-donut-card">
+                <div class="panel-heading">Distribution</div>
+                <div class="gf-donut-wrap">
+                    <div id="donut"></div>
+                    <div class="gf-legend" id="legend"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-heading">Recipients<span class="gf-sub">sorted by risk</span></div>
+            <div class="table-wrap">
+                <table class="table" style="margin-bottom:0;">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Position</th>
+                            <th class="num">Campaigns</th>
+                            <th class="num">Submitted</th>
+                            <th class="num">Clicked</th>
+                            <th class="num">Reported</th>
+                            <th class="num">Trained</th>
+                            <th>Risk score</th>
+                            <th>Level</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userRows"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-heading">Groups <span class="gf-sub">department roll-up</span></div>
+            <div class="table-wrap">
+                <table class="table" style="margin-bottom:0;">
+                    <thead>
+                        <tr>
+                            <th>Group</th>
+                            <th class="num">Members</th>
+                            <th class="num">Scored</th>
+                            <th>Risk score</th>
+                            <th>Level</th>
+                        </tr>
+                    </thead>
+                    <tbody id="groupRows"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}
+{{define "scripts"}}
+<script src="/js/dist/app/risk.min.js"></script>
+{{end}}
