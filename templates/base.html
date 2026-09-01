@@ -10,6 +10,25 @@
     <meta name="author" content="Jordan Wright (http://github.com/jordan-wright)">
     <link rel="shortcut icon" href="/images/favicon.ico">
 
+    <!-- GishFlow theme init (set before paint to avoid flash) + toggle -->
+    <script>
+    (function(){ try{ var t=localStorage.getItem('gf-theme'); if(t){ document.documentElement.setAttribute('data-theme',t); } }catch(e){} })();
+    function gfToggleTheme(){
+        var el=document.documentElement, cur=el.getAttribute('data-theme');
+        if(!cur){ cur=(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light'; }
+        var next=(cur==='dark')?'light':'dark';
+        el.setAttribute('data-theme',next);
+        try{ localStorage.setItem('gf-theme',next); }catch(e){}
+        gfSetThemeIcon(next);
+    }
+    function gfSetThemeIcon(t){ var i=document.getElementById('gf-theme-ico'); if(i){ i.className='fa fa-'+((t==='dark')?'sun-o':'moon-o'); } }
+    document.addEventListener('DOMContentLoaded',function(){
+        var el=document.documentElement, cur=el.getAttribute('data-theme');
+        if(!cur){ cur=(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light'; }
+        gfSetThemeIcon(cur);
+    });
+    </script>
+
     <title>{{ .Title }} - GishFlow</title>
 
     <link href="/css/dist/gophish.css" rel="stylesheet" type="text/css">
@@ -32,39 +51,42 @@
 </head>
 
 <body>
-    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="navbar navbar-inverse navbar-fixed-top gf-topbar" role="navigation">
         <div class="container-fluid">
             <div class="navbar-header">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <img class="navbar-logo" src="/images/logo_inv_small.png" />
-                <a class="navbar-brand" href="/">&nbsp;GishFlow</a>
+                <a class="navbar-brand" href="/">GishFlow</a>
             </div>
-            <div class="navbar-collapse collapse">
-                <ul class="nav navbar-nav navbar-right">
-                    <li>
-                        {{if .User}}
-                        <div class="btn-group" id="navbar-dropdown">
-                            <a class="btn btn-primary" href="/settings"><i class="fa fa-user"></i> {{.User.Username}}</a>
-                            <a class="btn btn-primary dropdown-toggle" href="/logout">
-                                <i class="fa fa-sign-out"></i>
-                            </a>
-                        </div>
-                        {{else}}
-                        <a href="/login">
-                            <button type="button" class="btn btn-primary">Login</button>
-                        </a>
-                        {{end}}
-                    </li>
-                </ul>
+            {{if .User}}{{template "nav" .}}{{end}}
+            <div class="gf-topbar-right">
+                {{if .User}}
+                <div class="btn-group" id="navbar-dropdown">
+                    <a class="btn btn-default btn-sm" href="/settings"><i class="fa fa-user"></i> {{.User.Username}}</a>
+                    <a class="btn btn-default btn-sm" href="/logout" title="Log out">
+                        <i class="fa fa-sign-out"></i>
+                    </a>
+                </div>
+                {{else}}
+                <a href="/login">
+                    <button type="button" class="btn btn-primary btn-sm">Login</button>
+                </a>
+                {{end}}
             </div>
         </div>
     </div>
-    {{template "nav" .}}
+    {{if .User}}
+    <div class="gf-corner">
+        <ul class="nav nav-sidebar gf-cornernav">
+            <li><a href="/settings"><i class="fa fa-cog"></i> Settings</a></li>
+            {{if .ModifySystem}}
+            <li><a href="/users"><i class="fa fa-users"></i> Users</a></li>
+            <li><a href="/webhooks"><i class="fa fa-plug"></i> Webhooks</a></li>
+            {{end}}
+        </ul>
+        <button type="button" class="gf-theme-toggle" onclick="gfToggleTheme()" title="สลับธีมสว่าง / มืด" aria-label="Toggle theme">
+            <i id="gf-theme-ico" class="fa fa-moon-o"></i>
+        </button>
+    </div>
+    {{end}}
     {{template "body" .}}
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="/js/dist/vendor.min.js"></script>

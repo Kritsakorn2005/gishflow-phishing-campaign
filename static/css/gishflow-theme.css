@@ -30,7 +30,7 @@ h1,h2,h3,h4,h5{font-family:var(--gf-font); letter-spacing:-.02em; color:var(--gf
 
 /* ---------- Top navbar ---------- */
 .navbar-inverse{
-  background:rgba(251,251,253,.8)!important; backdrop-filter:saturate(180%) blur(20px);
+  background:var(--gf-bar)!important; backdrop-filter:saturate(180%) blur(20px);
   -webkit-backdrop-filter:saturate(180%) blur(20px);
   border:0!important; border-bottom:1px solid var(--gf-hairline)!important; box-shadow:none!important;
   min-height:56px;
@@ -361,3 +361,94 @@ a:focus-visible,button:focus-visible,.btn:focus-visible,.form-control:focus-visi
 #timeline_chart{min-height:180px}
 #resultsMap{min-height:300px}
 #reported_chart .ct-series-a .ct-slice-donut{stroke:var(--gf-green)!important}
+
+/* ==========================================================================
+   Top navigation layout — nav moved from left sidebar to a centered top bar
+   (Apple.com-style). Structure kept as .nav-sidebar so gophish's active-nav
+   JS still works; this restyles it horizontal and relocates it.
+   ========================================================================== */
+.gf-topbar{min-height:56px; padding:0}
+.gf-topbar>.container-fluid{display:flex; align-items:center; gap:18px; max-width:1300px; margin:0 auto; padding:8px 24px; min-height:56px}
+.gf-topbar .navbar-header{float:none; margin:0; display:flex; align-items:center}
+.gf-topbar .navbar-brand{float:none; height:auto; line-height:1; padding:0; display:inline-flex; align-items:center; gap:9px}
+
+/* Centered horizontal nav */
+.gf-topnav-wrap{flex:1 1 auto; display:flex; justify-content:center; min-width:0; overflow-x:auto; -webkit-overflow-scrolling:touch}
+.gf-topnav-wrap::-webkit-scrollbar{height:0}
+.gf-topnav{display:flex; gap:2px; margin:0; padding:0; float:none; white-space:nowrap; list-style:none}
+.gf-topnav>li{float:none; display:block; margin:0}
+.gf-topnav>li>a{
+  display:block; padding:7px 14px; margin:0; border-radius:var(--gf-pill); background:transparent;
+  font-size:13.5px; font-weight:500; color:var(--gf-text-2); letter-spacing:-.01em; transition:background .15s,color .15s;
+}
+.gf-topnav>li>a:hover,.gf-topnav>li>a:focus{background:var(--gf-surface-2); color:var(--gf-text)}
+.gf-topnav>li.active>a,.gf-topnav>li.active>a:hover,.gf-topnav>li.active>a:focus{
+  background:var(--gf-accent-soft); color:var(--gf-accent); font-weight:600;
+}
+.gf-topbar-right{flex:none; display:flex; align-items:center; gap:6px}
+.gf-topbar-right .btn{border-radius:var(--gf-pill)}
+
+/* Content: full width + centered, sidebar removed */
+.sidebar{display:none!important}
+.main{
+  width:auto!important; max-width:1180px!important; margin:0 auto!important; float:none!important;
+  padding:92px 24px 72px!important;
+}
+
+@media (max-width:860px){
+  .gf-topbar>.container-fluid{gap:10px; padding:8px 14px}
+  .gf-topnav-wrap{justify-content:flex-start}
+  .main{padding-left:16px!important; padding-right:16px!important}
+}
+
+/* ==========================================================================
+   Light / Dark theme  (toggle button persists choice in localStorage)
+   ========================================================================== */
+:root{ --gf-bar:rgba(251,251,253,.82); }
+:root[data-theme="dark"]{
+  --gf-ground:#000000; --gf-surface:#1c1c1e; --gf-surface-2:#2c2c2e; --gf-surface-3:#3a3a3c;
+  --gf-text:#f5f5f7; --gf-text-2:#98989d; --gf-text-3:#8e8e93;
+  --gf-hairline:#2a2a2c; --gf-hairline-2:#48484a;
+  --gf-accent:#0a84ff; --gf-accent-hover:#409cff; --gf-accent-soft:rgba(10,132,255,.18);
+  --gf-red:#ff453a; --gf-qr:#7d7aff;
+  --gf-shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 30px rgba(0,0,0,.55);
+  --gf-shadow-lg:0 14px 54px rgba(0,0,0,.66);
+  --gf-bar:rgba(18,18,20,.72);
+}
+/* dark fixes for parts that used literal light colors */
+:root[data-theme="dark"] .form-control{color:var(--gf-text)}
+:root[data-theme="dark"] .modal-header .close{color:var(--gf-text-2); opacity:.7; text-shadow:none}
+:root[data-theme="dark"] .dataTables_wrapper .dataTables_filter input,
+:root[data-theme="dark"] .dataTables_wrapper .dataTables_length select{color:var(--gf-text)}
+:root[data-theme="dark"] .alert-success,:root[data-theme="dark"] .label-success{color:#5fe08a}
+:root[data-theme="dark"] .alert-danger,:root[data-theme="dark"] .label-danger{color:#ff8a80}
+:root[data-theme="dark"] .alert-warning,:root[data-theme="dark"] .label-warning{color:#ffcf7a}
+:root[data-theme="dark"] .select2-container--default .select2-selection__rendered,
+:root[data-theme="dark"] .select2-results{color:var(--gf-text)}
+:root[data-theme="dark"] code,:root[data-theme="dark"] pre{color:var(--gf-text)}
+:root[data-theme="dark"] .cke_top,:root[data-theme="dark"] .cke_bottom{background:var(--gf-surface-2)!important}
+
+/* ==========================================================================
+   Bottom-left corner: secondary (Settings / admin) links + theme toggle
+   ========================================================================== */
+.gf-corner{position:fixed; left:18px; bottom:18px; z-index:1000; display:flex; flex-direction:column; align-items:flex-start; gap:8px}
+.gf-cornernav{
+  display:flex; flex-direction:column; gap:2px; margin:0; padding:6px; list-style:none;
+  background:var(--gf-surface); border:1px solid var(--gf-hairline); border-radius:var(--gf-r); box-shadow:var(--gf-shadow);
+}
+.gf-cornernav>li{float:none; display:block; margin:0}
+.gf-cornernav>li>a{
+  display:flex; align-items:center; gap:9px; padding:8px 14px 8px 11px; margin:0; border-radius:var(--gf-r-sm);
+  font-size:13px; font-weight:500; color:var(--gf-text-2); background:transparent; white-space:nowrap;
+}
+.gf-cornernav>li>a .fa{width:15px; text-align:center; opacity:.85}
+.gf-cornernav>li>a:hover{background:var(--gf-surface-2); color:var(--gf-text)}
+.gf-cornernav>li.active>a,.gf-cornernav>li.active>a:hover{background:var(--gf-accent-soft); color:var(--gf-accent); font-weight:600}
+.gf-theme-toggle{
+  width:44px; height:44px; border-radius:50%; border:1px solid var(--gf-hairline); background:var(--gf-surface);
+  color:var(--gf-text-2); cursor:pointer; box-shadow:var(--gf-shadow); font-size:17px;
+  display:flex; align-items:center; justify-content:center; transition:background .15s,color .15s,transform .06s;
+}
+.gf-theme-toggle:hover{background:var(--gf-surface-2); color:var(--gf-accent)}
+.gf-theme-toggle:active{transform:scale(.94)}
+@media (max-width:860px){ .gf-corner{left:12px; bottom:12px} }
