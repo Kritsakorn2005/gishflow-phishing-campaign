@@ -4,69 +4,86 @@
         <i class="fa fa-spinner fa-spin fa-4x"></i>
     </div>
     <div style="display:none;" id="campaignResults">
-        <div class="row">
-            <h1 class="page-header" id="page-title">Results for campaign.name</h1>
-        </div>
-        <div class="row">
+        <h1 class="page-header" id="page-title">Results for campaign.name</h1>
+
+        <!-- Action bar -->
+        <div class="gf-actionbar">
             <a href="/campaigns" class="btn btn-default">
-                <i class="fa fa-arrow-circle-o-left fa-lg"></i> Back
+                <i class="fa fa-arrow-circle-o-left"></i> Back
             </a>
             <div class="btn-group">
-                <button type="button" id="exportButton" class="btn btn-primary dropdown-toggle" data-toggle="dropdown"
+                <button type="button" id="exportButton" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
                     aria-haspopup="true" aria-expanded="true">
                     <i class="fa fa-file-excel-o"></i> Export CSV
                     <i class="fa fa-caret-down"></i>
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="exportButton">
-                    <li>
-                        <a href="#" onclick="exportAsCSV('results')">Results</a>
-                    </li>
-                    <li>
-                        <a href="#" onclick="exportAsCSV('events')">Raw Events</a>
-                    </li>
+                    <li><a href="#" onclick="exportAsCSV('results')">Results</a></li>
+                    <li><a href="#" onclick="exportAsCSV('events')">Raw Events</a></li>
                 </ul>
             </div>
             <button id="complete_button" type="button" class="btn btn-blue" data-toggle="tooltip" onclick="completeCampaign()">
                 <i class="fa fa-flag-checkered"></i> Complete
             </button>
-            <button type="button" class="btn btn-danger" data-toggle="tooltip" onclick="deleteCampaign()">
-                <i class="fa fa-trash-o fa-lg"></i> Delete
+            <button id="refresh_btn" type="button" class="btn btn-default" data-toggle="tooltip" onclick="refresh()">
+                <i class="fa fa-refresh"></i> Refresh
             </button>
-            <button id="refresh_btn" type="button" class="btn btn-blue" data-toggle="tooltip" onclick="refresh()">
-                <i class="fa fa-refresh fa-lg"></i> Refresh
+            <button type="button" class="btn btn-danger" data-toggle="tooltip" onclick="deleteCampaign()">
+                <i class="fa fa-trash-o"></i> Delete
             </button>
             <span id="refresh_message">
                 <i class="fa fa-spin fa-spinner"></i> Refreshing
             </span>
         </div>
-        <br />
-        <div class="row">
-            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                <div class="row">
-                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                        <div id="timeline_chart"></div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div style="height:200px;" class="col-lg-1 col-md-1"></div>
-                    <div id="sent_chart" style="height:200px;" class="col-lg-2 col-md-2"></div>
-                    <div id="opened_chart" style="height:200px;" class="col-lg-2 col-md-2"></div>
-                    <div id="clicked_chart" style="height:200px;" class="col-lg-2 col-md-2"></div>
-                    <div id="submitted_data_chart" style="height:200px;" class="col-lg-2 col-md-2"></div>
-                    <div id="reported_chart" style="height:200px;" class="col-lg-2 col-md-2"></div>
-                    <div style="height:200px;" class="col-lg-1 col-md-1"></div>
-                </div>
-                <div class="row" id="resultsMapContainer">
-                    <div class="col-md-6">
-                        <p style="text-align:center;">Targets Map</p>
+
+        <!-- Timeline -->
+        <div class="panel gf-card">
+            <div class="panel-heading">Campaign timeline<span class="gf-sub">events over time</span></div>
+            <div class="panel-body">
+                <div id="timeline_chart"></div>
+            </div>
+        </div>
+
+        <!-- Engagement funnel -->
+        <div class="gf-stat-row">
+            <div class="gf-stat">
+                <div class="gf-stat-head"><span class="gf-dot" style="background:var(--gf-sent)"></span>Sent</div>
+                <div id="sent_chart" class="gf-donut" style="height:170px;"></div>
+            </div>
+            <div class="gf-stat">
+                <div class="gf-stat-head"><span class="gf-dot" style="background:var(--gf-opened)"></span>Opened</div>
+                <div id="opened_chart" class="gf-donut" style="height:170px;"></div>
+            </div>
+            <div class="gf-stat">
+                <div class="gf-stat-head"><span class="gf-dot" style="background:var(--gf-clicked)"></span>Clicked</div>
+                <div id="clicked_chart" class="gf-donut" style="height:170px;"></div>
+            </div>
+            <div class="gf-stat">
+                <div class="gf-stat-head"><span class="gf-dot" style="background:var(--gf-red)"></span>Submitted data</div>
+                <div id="submitted_data_chart" class="gf-donut" style="height:170px;"></div>
+            </div>
+            <div class="gf-stat">
+                <div class="gf-stat-head"><span class="gf-dot" style="background:var(--gf-green)"></span>Reported</div>
+                <div id="reported_chart" class="gf-donut" style="height:170px;"></div>
+            </div>
+        </div>
+
+        <!-- Targets map -->
+        <div class="row" id="resultsMapContainer">
+            <div class="col-md-7">
+                <div class="panel gf-card">
+                    <div class="panel-heading">Targets map</div>
+                    <div class="panel-body">
                         <div id="resultsMap"></div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="row">
-            <h2>Details</h2>
-            <table id="resultsTable" class="table">
+
+        <!-- Recipient details -->
+        <div class="panel gf-card">
+            <div class="panel-heading">Recipient details<span class="gf-sub">per-recipient status</span></div>
+            <table id="resultsTable" class="table" style="margin-bottom:0;">
                 <thead>
                     <tr>
                         <th>Result ID</th>

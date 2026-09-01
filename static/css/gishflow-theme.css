@@ -340,3 +340,24 @@ a:focus-visible,button:focus-visible,.btn:focus-visible,.form-control:focus-visi
 
 /* API key field reads as a token */
 #api_key{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:13px; letter-spacing:.02em}
+
+/* ==========================================================================
+   Campaign Results page
+   ========================================================================== */
+.gf-actionbar{display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-bottom:22px}
+.gf-actionbar .btn-group{margin:0}
+#refresh_message{color:var(--gf-text-3); font-size:13px; font-weight:500}
+
+/* gophish custom "btn-blue" -> tonal accent button */
+.btn-blue{background:var(--gf-accent-soft); color:var(--gf-accent); border:1px solid transparent}
+.btn-blue:hover,.btn-blue:focus,.btn-blue:active{background:rgba(0,113,227,.16); color:var(--gf-accent)}
+
+/* Export CSV dropdown menu */
+.dropdown-menu{border:1px solid var(--gf-hairline); border-radius:var(--gf-r-sm); box-shadow:var(--gf-shadow-lg); padding:6px; margin-top:6px; background:var(--gf-surface)}
+.dropdown-menu>li>a{border-radius:6px; padding:8px 12px; color:var(--gf-text); font-size:13.5px}
+.dropdown-menu>li>a:hover,.dropdown-menu>li>a:focus{background:var(--gf-surface-2); color:var(--gf-text)}
+
+/* Timeline + map sizing, reported donut color */
+#timeline_chart{min-height:180px}
+#resultsMap{min-height:300px}
+#reported_chart .ct-series-a .ct-slice-donut{stroke:var(--gf-green)!important}
