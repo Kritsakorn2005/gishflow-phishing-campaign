@@ -261,6 +261,30 @@ func (ps *PhishingServer) PhishHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Error(err)
 		http.NotFound(w, r)
+		return
+	}
+	// GishFlow teachable moment: once the recipient has interacted, show the
+	// campaign's training page instead of the landing page / redirect.
+	//   - POST (submitted data): always show it (they fell for it)
+	//   - GET (clicked) on a non-capturing landing page: show it too
+	if c.TrainingId != 0 {
+		showTraining := r.Method == "POST" || (r.Method == "GET" && !p.CaptureCredentials)
+		if showTraining {
+			tp, terr := models.GetTrainingPage(c.TrainingId, c.UserId)
+			if terr == nil && tp.HTML != "" {
+				if terr = rs.HandleTrainingViewed(d); terr != nil {
+					log.Error(terr)
+				}
+				html, terr := models.ExecuteTemplate(tp.HTML, ptx)
+				if terr != nil {
+					log.Error(terr)
+					http.NotFound(w, r)
+					return
+				}
+				w.Write([]byte(html))
+				return
+			}
+		}
 	}
 	renderPhishResponse(w, r, ptx, p)
 }

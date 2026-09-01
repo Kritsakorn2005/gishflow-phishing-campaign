@@ -191,6 +191,32 @@ var api = {
             return query("/pages/" + id, "DELETE", {}, false)
         }
     },
+    // training contains the endpoints for /training
+    training: {
+        // get() - Queries the API for GET /training
+        get: function () {
+            return query("/training/", "GET", {}, false)
+        },
+        // post() - Posts a training page to POST /training
+        post: function (page) {
+            return query("/training/", "POST", page, false)
+        }
+    },
+    // trainingId contains the endpoints for /training/:id
+    trainingId: {
+        // get() - Queries the API for GET /training/:id
+        get: function (id) {
+            return query("/training/" + id, "GET", {}, false)
+        },
+        // put() - Puts a training page to PUT /training/:id
+        put: function (page) {
+            return query("/training/" + page.id, "PUT", page, false)
+        },
+        // delete() - Deletes a training page at DELETE /training/:id
+        delete: function (id) {
+            return query("/training/" + id, "DELETE", {}, false)
+        }
+    },
     // SMTP contains the endpoints for /smtp
     SMTP: {
         // get() - Queries the API for GET /smtp

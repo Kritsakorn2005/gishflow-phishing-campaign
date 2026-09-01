@@ -53,6 +53,13 @@ function launch() {
                     send_by_date: send_by_date || null,
                     groups: groups,
                 }
+                // Optional teachable-moment (training) page
+                var trainingData = $("#training").select2("data")
+                if (trainingData && trainingData.length && trainingData[0].id) {
+                    campaign.training = {
+                        name: trainingData[0].text
+                    }
+                }
                 // Submit the campaign
                 api.campaigns.post(campaign)
                     .success(function (data) {
@@ -222,6 +229,19 @@ function setupOptions() {
                     page_select.trigger('change.select2')
                 }
             }
+        });
+    api.training.get()
+        .success(function (trainings) {
+            var training_s2 = $.map(trainings, function (obj) {
+                obj.text = obj.name
+                return obj
+            });
+            var training_select = $("#training.form-control")
+            training_select.select2({
+                placeholder: "None (optional)",
+                allowClear: true,
+                data: training_s2,
+            });
         });
     api.SMTP.get()
         .success(function (profiles) {

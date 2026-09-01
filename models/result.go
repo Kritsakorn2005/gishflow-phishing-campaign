@@ -34,6 +34,7 @@ type Result struct {
 	Longitude    float64   `json:"longitude"`
 	SendDate     time.Time `json:"send_date"`
 	Reported     bool      `json:"reported" sql:"not null"`
+	Trained      bool      `json:"trained" sql:"not null"`
 	ModifiedDate time.Time `json:"modified_date"`
 	BaseRecipient
 }
@@ -131,6 +132,23 @@ func (r *Result) HandleFormSubmit(details EventDetails) error {
 		return err
 	}
 	r.Status = EventDataSubmit
+	r.ModifiedDate = event.Time
+	return db.Save(r).Error
+}
+
+// HandleTrainingViewed updates a Result when the recipient is shown the
+// teachable-moment / training page after interacting with the simulation.
+// It records the event once (idempotent) and does not change the funnel
+// status, so a "Submitted Data" result stays "Submitted Data".
+func (r *Result) HandleTrainingViewed(details EventDetails) error {
+	if r.Trained {
+		return nil
+	}
+	event, err := r.createEvent(EventTrainingViewed, details)
+	if err != nil {
+		return err
+	}
+	r.Trained = true
 	r.ModifiedDate = event.Time
 	return db.Save(r).Error
 }

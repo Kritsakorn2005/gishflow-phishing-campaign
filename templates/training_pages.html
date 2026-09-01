@@ -1,0 +1,77 @@
+{{define "body"}}
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <h1 class="page-header">
+        Training Pages
+    </h1>
+    <div id="flashes" class="row"></div>
+    <div class="gf-var-note">
+        <div class="gf-var-ico"><i class="fa fa-graduation-cap"></i></div>
+        <div>
+            <b>Teachable moment</b> — this page is shown to a recipient right after they fall for a simulation
+            (submitted data, or clicked a link on a no-form page). Use it to explain that it was a test and
+            highlight the red flags. Personalize with <code class="qr">{{"{{"}}.FirstName{{"}}"}}</code>.
+        </div>
+    </div>
+    <div class="row">
+        <button type="button" class="btn btn-primary" onclick="edit(-1)" data-toggle="modal" data-backdrop="static"
+            data-target="#modal"><i class="fa fa-plus"></i> New Training Page</button>
+    </div>
+    &nbsp;
+    <div id="loading">
+        <i class="fa fa-spinner fa-spin fa-4x"></i>
+    </div>
+    <div id="emptyMessage" class="row" style="display:none;">
+        <div class="alert alert-info">
+            No training pages yet. Let's create one!
+        </div>
+    </div>
+    <div class="row">
+        <table id="trainingTable" class="table" style="display:none;">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Last Modified Date</th>
+                    <th class="col-md-2 no-sort"></th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="dismiss()"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="modalLabel">New Training Page</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row" id="modal.flashes"></div>
+                <label class="control-label" for="name">Name:</label>
+                <div class="form-group">
+                    <input type="text" class="form-control" placeholder="Training page name" id="name" autofocus />
+                </div>
+                <label class="control-label" for="html_editor">HTML:</label>
+                <div class="tab-content">
+                    <div role="tabpanel" class="tab-pane active" id="html">
+                        <textarea id="html_editor"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" data-dismiss="modal" class="btn btn-default" onclick="dismiss()">Cancel</button>
+                <button type="button" class="btn btn-primary" id="modalSubmit">Save Page</button>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}
+{{define "scripts"}}
+<script src="/js/src/vendor/ckeditor/ckeditor.js"></script>
+<script src="/js/src/vendor/ckeditor/adapters/jquery.js"></script>
+<script src="/js/dist/app/autocomplete.min.js"></script>
+<script src="/js/dist/app/training_pages.min.js"></script>
+{{end}}

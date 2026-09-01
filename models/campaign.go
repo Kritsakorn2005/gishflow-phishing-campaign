@@ -13,24 +13,26 @@ import (
 
 // Campaign is a struct representing a created campaign
 type Campaign struct {
-	Id            int64     `json:"id"`
-	UserId        int64     `json:"-"`
-	Name          string    `json:"name" sql:"not null"`
-	CreatedDate   time.Time `json:"created_date"`
-	LaunchDate    time.Time `json:"launch_date"`
-	SendByDate    time.Time `json:"send_by_date"`
-	CompletedDate time.Time `json:"completed_date"`
-	TemplateId    int64     `json:"-"`
-	Template      Template  `json:"template"`
-	PageId        int64     `json:"-"`
-	Page          Page      `json:"page"`
-	Status        string    `json:"status"`
-	Results       []Result  `json:"results,omitempty"`
-	Groups        []Group   `json:"groups,omitempty"`
-	Events        []Event   `json:"timeline,omitempty"`
-	SMTPId        int64     `json:"-"`
-	SMTP          SMTP      `json:"smtp"`
-	URL           string    `json:"url"`
+	Id            int64        `json:"id"`
+	UserId        int64        `json:"-"`
+	Name          string       `json:"name" sql:"not null"`
+	CreatedDate   time.Time    `json:"created_date"`
+	LaunchDate    time.Time    `json:"launch_date"`
+	SendByDate    time.Time    `json:"send_by_date"`
+	CompletedDate time.Time    `json:"completed_date"`
+	TemplateId    int64        `json:"-"`
+	Template      Template     `json:"template"`
+	PageId        int64        `json:"-"`
+	Page          Page         `json:"page"`
+	TrainingId    int64        `json:"-"`
+	Training      TrainingPage `json:"training,omitempty" gorm:"-"`
+	Status        string       `json:"status"`
+	Results       []Result     `json:"results,omitempty"`
+	Groups        []Group      `json:"groups,omitempty"`
+	Events        []Event      `json:"timeline,omitempty"`
+	SMTPId        int64        `json:"-"`
+	SMTP          SMTP         `json:"smtp"`
+	URL           string       `json:"url"`
 }
 
 // CampaignResults is a struct representing the results from a campaign
@@ -106,6 +108,9 @@ var ErrTemplateNotSpecified = errors.New("No email template specified")
 
 // ErrPageNotSpecified indicates a landing page was not provided for the campaign
 var ErrPageNotSpecified = errors.New("No landing page specified")
+
+// ErrTrainingNotFound indicates the training page specified does not exist
+var ErrTrainingNotFound = errors.New("Training page not found")
 
 // ErrSMTPNotSpecified indicates a sending profile was not provided for the campaign
 var ErrSMTPNotSpecified = errors.New("No sending profile specified")
@@ -211,6 +216,16 @@ func (c *Campaign) getDetails() error {
 		}
 		c.Page = Page{Name: "[Deleted]"}
 		log.Warnf("%s: page not found for campaign", err)
+	}
+	if c.TrainingId != 0 {
+		err = db.Table("training_pages").Where("id=?", c.TrainingId).Find(&c.Training).Error
+		if err != nil {
+			if err != gorm.ErrRecordNotFound {
+				return err
+			}
+			c.Training = TrainingPage{Name: "[Deleted]"}
+			log.Warnf("%s: training page not found for campaign", err)
+		}
 	}
 	err = db.Table("smtp").Where("id=?", c.SMTPId).Find(&c.SMTP).Error
 	if err != nil {
@@ -513,6 +528,22 @@ func PostCampaign(c *Campaign, uid int64) error {
 	}
 	c.Page = p
 	c.PageId = p.Id
+	// Optionally attach a training / teachable-moment page. It's not required,
+	// so we only look it up when a name was provided.
+	if c.Training.Name != "" {
+		tp, err := GetTrainingPageByName(c.Training.Name, uid)
+		if err == gorm.ErrRecordNotFound {
+			log.WithFields(logrus.Fields{
+				"training": c.Training.Name,
+			}).Error("Training page does not exist")
+			return ErrTrainingNotFound
+		} else if err != nil {
+			log.Error(err)
+			return err
+		}
+		c.Training = tp
+		c.TrainingId = tp.Id
+	}
 	// Check to make sure the sending profile exists
 	s, err := GetSMTPByName(c.SMTP.Name, uid)
 	if err == gorm.ErrRecordNotFound {
