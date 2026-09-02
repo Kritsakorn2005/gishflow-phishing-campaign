@@ -59,6 +59,7 @@ scripts = function () {
             app_directory + 'landing_pages.js',
             app_directory + 'training_pages.js',
             app_directory + 'risk.js',
+            app_directory + 'qr.js',
             app_directory + 'sending_profiles.js',
             app_directory + 'settings.js',
             app_directory + 'templates.js',

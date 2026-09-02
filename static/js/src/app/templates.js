@@ -13,6 +13,24 @@ var icons = {
     "application/x-msdownload": "fa-file-o"
 }
 
+// insertQRCode inserts the {{.QRCode}} variable into the HTML editor, so the
+// user doesn't have to remember to type it. GishFlow renders it as a QR of the
+// recipient's tracked link when the email is sent.
+function insertQRCode() {
+    $('.nav-tabs a[href="#html"]').tab('show')
+    var editor = CKEDITOR.instances["html_editor"]
+    if (editor) {
+        editor.insertText("{{.QRCode}}")
+        editor.focus()
+    } else {
+        // Fallback: append to the raw textarea if CKEditor isn't ready yet
+        var ta = document.getElementById("html_editor")
+        if (ta) {
+            ta.value += "{{.QRCode}}"
+        }
+    }
+}
+
 // Save attempts to POST to /templates/
 function save(idx) {
     var template = {

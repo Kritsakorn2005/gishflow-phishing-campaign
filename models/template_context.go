@@ -66,12 +66,17 @@ func NewPhishingTemplateContext(ctx TemplateContext, r BaseRecipient, rid string
 	trackingURL.Path = path.Join(trackingURL.Path, "/track")
 	trackingURL.RawQuery = q.Encode()
 
-	// Generate a QR code that encodes the recipient's phishing URL. It's
+	// Generate a QR code that encodes the recipient's phishing URL, tagged with
+	// a "qr" marker so scans can be distinguished from ordinary link clicks. It's
 	// embedded as a self-contained data-URI <img> so templates can simply
 	// reference {{.QRCode}}. Any generation error leaves QRCode empty so a
 	// campaign that doesn't use the QR code is never affected.
+	qrURL, _ := url.Parse(phishURL.String())
+	qq := qrURL.Query()
+	qq.Set("qr", "1")
+	qrURL.RawQuery = qq.Encode()
 	qrCode := ""
-	if png, qrErr := qrcode.Encode(phishURL.String(), qrcode.Medium, 256); qrErr == nil {
+	if png, qrErr := qrcode.Encode(qrURL.String(), qrcode.Medium, 256); qrErr == nil {
 		qrCode = fmt.Sprintf("<img alt='' src='data:image/png;base64,%s'/>",
 			base64.StdEncoding.EncodeToString(png))
 	}

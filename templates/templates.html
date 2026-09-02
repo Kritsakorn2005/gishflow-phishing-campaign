@@ -66,7 +66,7 @@
                 <!-- GishFlow: personalization variables + QR (quishing) helper -->
                 <div class="gf-var-note">
                     <div class="gf-var-ico"><i class="fa fa-qrcode"></i></div>
-                    <div>
+                    <div style="flex:1;">
                         <b>Personalization variables</b> — GishFlow fills these in per recipient:
                         <div class="gf-var-chips">
                             <code>{{"{{"}}.FirstName{{"}}"}}</code>
@@ -74,7 +74,14 @@
                             <code>{{"{{"}}.Tracker{{"}}"}}</code>
                             <code class="qr">{{"{{"}}.QRCode{{"}}"}}</code>
                         </div>
-                        <small>Drop <code class="qr">{{"{{"}}.QRCode{{"}}"}}</code> into the HTML body to embed a QR code of the recipient's tracked link (quishing) — scans are logged just like link clicks.</small>
+                        <div class="gf-qr-insert">
+                            <button type="button" class="btn btn-default btn-sm" onclick="insertQRCode()"><i class="fa fa-qrcode"></i> Insert QR code</button>
+                            <small>Embeds a QR of the recipient's tracked link into the HTML body (quishing). Scans are logged like clicks.</small>
+                        </div>
+                    </div>
+                    <div class="gf-qr-sample">
+                        <img alt="Sample QR code" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAAQMAAABmvDolAAAABlBMVEX///8AAABVwtN+AAABnElEQVR42uyYsZHEIAxFxThwSAkuhdKgNEpxCYQEHv7NF3i9d+tLbw6NFThgX7LSR/pInnjiiX8bHowqEgGULUu7jiwBu4gs1ecosmIXAv3IGBDQlisP0dXXkUmgLQByhGXAIzVZCzmxCXQJhwRUvbb1VvazA70h+RzdsQ5V3zWxyYErqOo93P1iAPB7SJRwgDtWgOIWCckdUwGycZSwqE0IQMdKvERrBJAxN/t1DMnp90dR5wc2aG0DcDAbCShaezEGZHHaYyln5gEst3vLgwlgZCDHMSo70BZbAL1ADxEdKPwiORgDkIVNOOtAAavuwSEqpgDZ9LiEhGMt2p34TnmXvQ0gx8Z0EOBgdWr22mIL6AYWJWD8dZq9HB1sAdqKWeiz9vKhaguAH56Iqj4nDpDePe0EwMmpC+LT49YmTQ9cGy19ZyH15YCzBrxezQ4o25mHb6I1AYwdCPSGMgPab1EtAsIrDNArVLp52AR8b0tblqbavlt5zQ2c66vWB8pvsp8cGBstJGKbuiBk+WhikwNPPPHEn8dXAAAA///q/vYSLSHdNwAAAABJRU5ErkJggg==">
+                        <span>sample</span>
                     </div>
                 </div>
                 <!-- Nav tabs -->

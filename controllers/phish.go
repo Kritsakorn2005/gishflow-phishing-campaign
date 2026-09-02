@@ -251,6 +251,13 @@ func (ps *PhishingServer) PhishHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Error(err)
 		}
+		// GishFlow: if the link was reached by scanning a QR code, record a
+		// separate "QR Scanned" event so quishing can be told apart from clicks.
+		if r.Form.Get("qr") == "1" {
+			if qerr := rs.HandleQRScanned(d); qerr != nil {
+				log.Error(qerr)
+			}
+		}
 	case r.Method == "POST":
 		err = rs.HandleFormSubmit(d)
 		if err != nil {

@@ -52,6 +52,7 @@ const (
 	EventDataSubmit     string = "Submitted Data"
 	EventReported       string = "Email Reported"
 	EventTrainingViewed string = "Viewed Training"
+	EventQRScanned      string = "QR Scanned"
 	EventProxyRequest   string = "Proxied request"
 	StatusSuccess       string = "Success"
 	StatusQueued        string = "Queued"

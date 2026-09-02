@@ -124,6 +124,15 @@ func (r *Result) HandleClickedLink(details EventDetails) error {
 	return db.Save(r).Error
 }
 
+// HandleQRScanned records that the recipient reached the landing page by
+// scanning a QR code (a "qr" marker is present on the request). It's logged as
+// its own event, alongside the normal click, so QR scans can be told apart from
+// ordinary link clicks. The funnel status is left to HandleClickedLink.
+func (r *Result) HandleQRScanned(details EventDetails) error {
+	_, err := r.createEvent(EventQRScanned, details)
+	return err
+}
+
 // HandleFormSubmit updates a Result in the case where the recipient submitted
 // credentials to the form on a Landing Page.
 func (r *Result) HandleFormSubmit(details EventDetails) error {

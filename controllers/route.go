@@ -134,6 +134,7 @@ func (as *AdminServer) registerRoutes() {
 	router.HandleFunc("/landing_pages", mid.Use(as.LandingPages, mid.RequireLogin))
 	router.HandleFunc("/training_pages", mid.Use(as.TrainingPages, mid.RequireLogin))
 	router.HandleFunc("/risk", mid.Use(as.Risk, mid.RequireLogin))
+	router.HandleFunc("/qr", mid.Use(as.QRGenerator, mid.RequireLogin))
 	router.HandleFunc("/sending_profiles", mid.Use(as.SendingProfiles, mid.RequireLogin))
 	router.HandleFunc("/settings", mid.Use(as.Settings, mid.RequireLogin))
 	router.HandleFunc("/users", mid.Use(as.UserManagement, mid.RequirePermission(models.PermissionModifySystem), mid.RequireLogin))
@@ -252,6 +253,13 @@ func (as *AdminServer) Risk(w http.ResponseWriter, r *http.Request) {
 	params := newTemplateParams(r)
 	params.Title = "Risk"
 	getTemplate(w, "risk").ExecuteTemplate(w, "base", params)
+}
+
+// QRGenerator renders the standalone QR code generator
+func (as *AdminServer) QRGenerator(w http.ResponseWriter, r *http.Request) {
+	params := newTemplateParams(r)
+	params.Title = "QR Generator"
+	getTemplate(w, "qr").ExecuteTemplate(w, "base", params)
 }
 
 // SendingProfiles handles the default path and template execution

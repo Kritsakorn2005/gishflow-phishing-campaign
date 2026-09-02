@@ -1,0 +1,53 @@
+{{define "body"}}
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <h1 class="page-header">QR Generator</h1>
+    <div id="flashes" class="row"></div>
+    <div class="gf-var-note" style="margin-bottom:20px;">
+        <div class="gf-var-ico"><i class="fa fa-qrcode"></i></div>
+        <div>
+            <b>Physical quishing</b> — generate a QR code for any link (e.g. your phishing landing page) to print on
+            posters or flyers. For per-recipient tracking inside emails, use <code class="qr">{{"{{"}}.QRCode{{"}}"}}</code>
+            in an Email Template instead.
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="panel">
+                <div class="panel-heading">Content</div>
+                <div class="panel-body">
+                    <label class="control-label" for="qr_text">URL or text</label>
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="qr_text" placeholder="https://sso.example-login.co" autofocus>
+                    </div>
+                    <label class="control-label" for="qr_size">Size</label>
+                    <div class="form-group">
+                        <select class="form-control" id="qr_size">
+                            <option value="256">256 px</option>
+                            <option value="512" selected>512 px</option>
+                            <option value="1024">1024 px</option>
+                        </select>
+                    </div>
+                    <button type="button" class="btn btn-primary" id="qr_generate"><i class="fa fa-qrcode"></i> Generate</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="panel">
+                <div class="panel-heading">Result</div>
+                <div class="panel-body" style="text-align:center;">
+                    <div id="qr_empty" class="muted-cell" style="padding:40px 0;">Enter a link and press Generate.</div>
+                    <div id="qr_result" style="display:none;">
+                        <img id="qr_image" alt="Generated QR code" style="max-width:100%; background:#fff; padding:12px; border-radius:12px; box-shadow:0 4px 16px rgba(0,0,0,.08);">
+                        <div style="margin-top:16px;">
+                            <a id="qr_download" class="btn btn-default" download="gishflow-qr.png"><i class="fa fa-download"></i> Download PNG</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}
+{{define "scripts"}}
+<script src="/js/dist/app/qr.min.js"></script>
+{{end}}
