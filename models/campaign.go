@@ -587,6 +587,7 @@ func PostCampaign(c *Campaign, uid int64) error {
 					Position:  t.Position,
 					FirstName: t.FirstName,
 					LastName:  t.LastName,
+					LineID:    t.LineID,
 				},
 				Status:       StatusScheduled,
 				CampaignId:   c.Id,

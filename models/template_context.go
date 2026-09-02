@@ -35,13 +35,15 @@ type PhishingTemplateContext struct {
 // NewPhishingTemplateContext returns a populated PhishingTemplateContext,
 // parsing the correct fields from the provided TemplateContext and recipient.
 func NewPhishingTemplateContext(ctx TemplateContext, r BaseRecipient, rid string) (PhishingTemplateContext, error) {
-	f, err := mail.ParseAddress(ctx.getFromAddress())
-	if err != nil {
-		return PhishingTemplateContext{}, err
-	}
-	fn := f.Name
-	if fn == "" {
-		fn = f.Address
+	// Parse the "From" for the {{.From}} variable. A LINE (or other non-email)
+	// channel has no email From address, so we tolerate an empty/invalid value
+	// rather than failing - email campaigns always have a valid From.
+	fn := ""
+	if f, ferr := mail.ParseAddress(ctx.getFromAddress()); ferr == nil {
+		fn = f.Name
+		if fn == "" {
+			fn = f.Address
+		}
 	}
 	templateURL, err := ExecuteTemplate(ctx.getBaseURL(), r)
 	if err != nil {

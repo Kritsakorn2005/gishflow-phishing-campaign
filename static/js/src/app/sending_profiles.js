@@ -1,5 +1,17 @@
 var profiles = []
 
+// toggleInterface shows the SMTP or LINE fields depending on the selected
+// interface type.
+function toggleInterface() {
+    if ($("#interface_type").val() === "LINE") {
+        $("#smtp_fields").hide()
+        $("#line_fields").show()
+    } else {
+        $("#smtp_fields").show()
+        $("#line_fields").hide()
+    }
+}
+
 // Attempts to send a test email by POSTing to /campaigns/
 function sendTestEmail() {
     var headers = [];
@@ -59,6 +71,10 @@ function save(idx) {
     profile.username = $("#username").val()
     profile.password = $("#password").val()
     profile.ignore_cert_errors = $("#ignore_cert_errors").prop("checked")
+    // For a LINE channel, the token is stored in the password field.
+    if (profile.interface_type === "LINE") {
+        profile.password = $("#line_token").val()
+    }
     if (idx != -1) {
         profile.id = profiles[idx].id
         api.SMTPId.put(profile)
@@ -93,6 +109,8 @@ function dismiss() {
     $("#username").val("")
     $("#password").val("")
     $("#ignore_cert_errors").prop("checked", true)
+    $("#line_token").val("")
+    toggleInterface()
     $("#headersTable").dataTable().DataTable().clear().draw()
     $("#modal").modal('hide')
 }
@@ -165,9 +183,11 @@ function edit(idx) {
         $.each(profile.headers, function (i, record) {
             addCustomHeader(record.key, record.value)
         });
+        $("#line_token").val(profile.interface_type === "LINE" ? profile.password : "")
     } else {
         $("#profileModalLabel").text("New Sending Profile")
     }
+    toggleInterface()
 }
 
 function copy(idx) {
@@ -183,6 +203,8 @@ function copy(idx) {
     $("#username").val(profile.username)
     $("#password").val(profile.password)
     $("#ignore_cert_errors").prop("checked", profile.ignore_cert_errors)
+    $("#line_token").val(profile.interface_type === "LINE" ? profile.password : "")
+    toggleInterface()
 }
 
 function load() {
@@ -306,6 +328,7 @@ $(document).ready(function () {
     $('#modal').on('hidden.bs.modal', function (event) {
         dismiss()
     });
+    $("#interface_type").change(toggleInterface)
     $("#sendTestEmailModal").on("hidden.bs.modal", function (event) {
         dismissSendTestEmailModal()
     })

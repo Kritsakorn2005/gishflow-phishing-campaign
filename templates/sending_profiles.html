@@ -49,7 +49,13 @@
                         <label class="control-label" for="name">Name:</label>
                         <input type="text" class="form-control" placeholder="Profile name" id="name" autofocus />
                         <label class="control-label" for="interface_type">Interface Type:</label>
-                        <input type="text" class="form-control" value="SMTP" id="interface_type" disabled />
+                        <select class="form-control" id="interface_type">
+                            <option value="SMTP">SMTP (Email)</option>
+                            <option value="LINE">LINE (Messaging API)</option>
+                        </select>
+                    </div>
+                    <div id="smtp_fields">
+                    <div class="form-group">
                         <label class="control-label" for="from">SMTP From: <i class="fa fa-question-circle"
                                 data-toggle="tooltip" data-placement="right" title="Set this to an email address from your sending domain to bypass SPF-checks. You can set the Envelope Sender in Email Templates. The Envelope Sender is shown to the user."></i></label>
                         <input type="text" class="form-control" placeholder="test@example.com" id="from"
@@ -92,6 +98,14 @@
                     </table>
                     <button type="button" data-toggle="modal" data-backdrop="static" data-target="#sendTestEmailModal"
                         class="btn btn-primary"><i class="fa fa-envelope"></i> Send Test Email</button>
+                    </div>
+                    <div id="line_fields" style="display:none;">
+                        <div class="form-group">
+                            <label class="control-label" for="line_token">LINE Channel Access Token:</label>
+                            <input type="password" class="form-control" id="line_token" placeholder="Long-lived channel access token" autocomplete="new-password" />
+                            <p class="help-block">From LINE Developers &rarr; your Messaging API channel. Recipients must have added your Official Account as a friend to receive messages.</p>
+                        </div>
+                    </div>
                 </form>
             </div>
             <div class="modal-footer">

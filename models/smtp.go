@@ -69,6 +69,14 @@ var ErrHostNotSpecified = errors.New("No SMTP Host specified")
 // ErrInvalidHost indicates that the SMTP server string is invalid
 var ErrInvalidHost = errors.New("Invalid SMTP server address")
 
+// InterfaceLine is the interface_type of a sending profile that delivers via
+// the LINE Messaging API instead of SMTP. The channel access token is stored
+// in the profile's Password field.
+const InterfaceLine = "LINE"
+
+// ErrLineTokenNotSpecified is thrown when a LINE sending profile has no token
+var ErrLineTokenNotSpecified = errors.New("No LINE channel access token specified")
+
 // TableName specifies the database tablename for Gorm to use
 func (s SMTP) TableName() string {
 	return "smtp"
@@ -76,6 +84,14 @@ func (s SMTP) TableName() string {
 
 // Validate ensures that SMTP configs/connections are valid
 func (s *SMTP) Validate() error {
+	// A LINE channel is validated differently: it only needs a channel access
+	// token (stored in Password) - no host or from address.
+	if s.Interface == InterfaceLine {
+		if s.Password == "" {
+			return ErrLineTokenNotSpecified
+		}
+		return nil
+	}
 	switch {
 	case s.FromAddress == "":
 		return ErrFromAddressNotSpecified

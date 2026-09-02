@@ -2,6 +2,7 @@ package worker
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	log "github.com/gophish/gophish/logger"
@@ -90,6 +91,15 @@ func (w *DefaultWorker) processCampaigns(t time.Time) error {
 					return
 				}
 			}
+			// GishFlow: if the campaign's sending profile is a LINE channel,
+			// deliver via the LINE Messaging API instead of the SMTP mailer.
+			if c.SMTP.Interface == models.InterfaceLine {
+				log.WithFields(logrus.Fields{
+					"num_messages": len(msc),
+				}).Info("Sending LINE messages")
+				w.sendViaLine(c, msc)
+				return
+			}
 			log.WithFields(logrus.Fields{
 				"num_emails": len(msc),
 			}).Info("Sending emails to mailer for processing")
@@ -144,7 +154,46 @@ func (w *DefaultWorker) LaunchCampaign(c models.Campaign) {
 		}
 		mailEntries = append(mailEntries, m)
 	}
+	// GishFlow: deliver via LINE if this is a LINE channel campaign.
+	if campaignMailCtx.SMTP.Interface == models.InterfaceLine {
+		w.sendViaLine(campaignMailCtx, mailEntries)
+		return
+	}
 	w.mailer.Queue(mailEntries)
+}
+
+// sendViaLine delivers a batch of maillogs through the LINE Messaging API. It
+// renders each recipient's message (the campaign template's text body, with
+// {{.URL}} etc. filled in) and pushes it to their LINE userId, reusing the
+// existing result/maillog bookkeeping (Success/Error) so tracking, teachable
+// moments and risk scoring all work exactly as they do for email.
+func (w *DefaultWorker) sendViaLine(c models.Campaign, msc []mailer.Mail) {
+	token := c.SMTP.Password
+	for _, entry := range msc {
+		m, ok := entry.(*models.MailLog)
+		if !ok {
+			entry.Error(fmt.Errorf("unexpected mail type for LINE channel"))
+			continue
+		}
+		to, text, err := m.GenerateLine()
+		if err != nil {
+			log.Error(err)
+			m.Error(err)
+			continue
+		}
+		if to == "" {
+			m.Error(fmt.Errorf("recipient has no LINE ID"))
+			continue
+		}
+		if err := models.SendLineMessage(token, to, text); err != nil {
+			log.Error(err)
+			m.Error(err)
+			continue
+		}
+		if err := m.Success(); err != nil {
+			log.Error(err)
+		}
+	}
 }
 
 // SendTestEmail sends a test email
