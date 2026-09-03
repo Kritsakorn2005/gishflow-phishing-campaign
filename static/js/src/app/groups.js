@@ -9,7 +9,8 @@ function save(id) {
             last_name: unescapeHtml(target[1]),
             email: unescapeHtml(target[2]),
             position: unescapeHtml(target[3]),
-            line_id: unescapeHtml(target[4])
+            line_id: unescapeHtml(target[4]),
+            phone: unescapeHtml(target[5])
         })
     })
     var group = {
@@ -80,6 +81,7 @@ function edit(id) {
                       escapeHtml(record.email),
                       escapeHtml(record.position),
                       escapeHtml(record.line_id || ''),
+                      escapeHtml(record.phone || ''),
                       '<span style="cursor:pointer;"><i class="fa fa-trash-o"></i></span>'
                   ])
                 });
@@ -113,7 +115,8 @@ function edit(id) {
                     record.last_name,
                     record.email,
                     record.position,
-                    record.line_id);
+                    record.line_id,
+                    record.phone);
             });
             targets.DataTable().draw();
         }
@@ -188,7 +191,7 @@ var deleteGroup = function (id) {
     })
 }
 
-function addTarget(firstNameInput, lastNameInput, emailInput, positionInput, lineIdInput) {
+function addTarget(firstNameInput, lastNameInput, emailInput, positionInput, lineIdInput, phoneInput) {
     // Create new data row.
     var email = escapeHtml(emailInput).toLowerCase();
     var newRow = [
@@ -197,6 +200,7 @@ function addTarget(firstNameInput, lastNameInput, emailInput, positionInput, lin
         email,
         escapeHtml(positionInput),
         escapeHtml(lineIdInput || ''),
+        escapeHtml(phoneInput || ''),
         '<span style="cursor:pointer;"><i class="fa fa-trash-o"></i></span>'
     ];
 
@@ -279,7 +283,8 @@ $(document).ready(function () {
             $("#lastName").val(),
             $("#email").val(),
             $("#position").val(),
-            $("#lineId").val());
+            $("#lineId").val(),
+            $("#phone").val());
         targets.DataTable().draw();
 
         // Reset user input.

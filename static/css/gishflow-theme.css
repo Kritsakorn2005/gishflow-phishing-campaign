@@ -490,3 +490,17 @@ a:focus-visible,button:focus-visible,.btn:focus-visible,.form-control:focus-visi
 .gf-qr-sample{flex:none; text-align:center}
 .gf-qr-sample img{width:66px; height:66px; border-radius:8px; background:#fff; padding:5px; box-shadow:0 2px 8px rgba(0,0,0,.08); display:block}
 .gf-qr-sample span{font-size:10px; color:var(--gf-text-3); text-transform:uppercase; letter-spacing:.05em}
+
+/* ==========================================================================
+   Wider content for data-heavy pages + non-wrapping table headers
+   ========================================================================== */
+.main{max-width:1360px!important}
+/* keep column headers (e.g. "First Name", "LINE userId") on a single line */
+.table>thead>tr>th{white-space:nowrap}
+/* don't let the long LINE userId wrap mid-id */
+#resultsTable td{white-space:nowrap}
+
+/* ---------- Dashboard channel filter ---------- */
+.gf-channel-filter{display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap}
+.gf-channel-filter .btn{border-radius:var(--gf-pill)}
+.gf-channel-filter .btn.active{background:var(--gf-accent)!important; border-color:var(--gf-accent)!important; color:#fff!important}

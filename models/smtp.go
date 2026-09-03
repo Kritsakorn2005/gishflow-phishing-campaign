@@ -77,6 +77,15 @@ const InterfaceLine = "LINE"
 // ErrLineTokenNotSpecified is thrown when a LINE sending profile has no token
 var ErrLineTokenNotSpecified = errors.New("No LINE channel access token specified")
 
+// InterfaceSMS is the interface_type of a sending profile that delivers via
+// SMS (ThaiBulkSMS). The API key is stored in Username, the API secret in
+// Password, and the sender name in FromAddress.
+const InterfaceSMS = "SMS"
+
+// ErrSMSCredentialsNotSpecified is thrown when an SMS profile is missing its
+// API key or secret
+var ErrSMSCredentialsNotSpecified = errors.New("No SMS API key/secret specified")
+
 // TableName specifies the database tablename for Gorm to use
 func (s SMTP) TableName() string {
 	return "smtp"
@@ -89,6 +98,13 @@ func (s *SMTP) Validate() error {
 	if s.Interface == InterfaceLine {
 		if s.Password == "" {
 			return ErrLineTokenNotSpecified
+		}
+		return nil
+	}
+	// An SMS channel needs an API key (Username) and secret (Password).
+	if s.Interface == InterfaceSMS {
+		if s.Username == "" || s.Password == "" {
+			return ErrSMSCredentialsNotSpecified
 		}
 		return nil
 	}

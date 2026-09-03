@@ -52,6 +52,7 @@
                         <select class="form-control" id="interface_type">
                             <option value="SMTP">SMTP (Email)</option>
                             <option value="LINE">LINE (Messaging API)</option>
+                            <option value="SMS">SMS (ThaiBulkSMS)</option>
                         </select>
                     </div>
                     <div id="smtp_fields">
@@ -104,6 +105,21 @@
                             <label class="control-label" for="line_token">LINE Channel Access Token:</label>
                             <input type="password" class="form-control" id="line_token" placeholder="Long-lived channel access token" autocomplete="new-password" />
                             <p class="help-block">From LINE Developers &rarr; your Messaging API channel. Recipients must have added your Official Account as a friend to receive messages.</p>
+                        </div>
+                    </div>
+                    <div id="sms_fields" style="display:none;">
+                        <div class="form-group">
+                            <label class="control-label" for="sms_key">API Key:</label>
+                            <input type="text" class="form-control" id="sms_key" placeholder="ThaiBulkSMS API key" />
+                            <label class="control-label" for="sms_secret">API Secret:</label>
+                            <input type="password" class="form-control" id="sms_secret" placeholder="ThaiBulkSMS API secret" autocomplete="new-password" />
+                            <label class="control-label" for="sms_sender">Sender Name:</label>
+                            <input type="text" class="form-control" id="sms_sender" placeholder="Registered sender name (e.g. GishFlow)" />
+                            <p class="help-block">From your ThaiBulkSMS account. The sender name must be pre-registered/approved. SMS is limited to ~160 characters, so keep the template text short.</p>
+                            <div class="checkbox checkbox-primary">
+                                <input id="sms_mock" type="checkbox" checked>
+                                <label for="sms_mock">Mock mode &mdash; log only, don't actually send (no ThaiBulkSMS credits used). Turn off to send for real.</label>
+                            </div>
                         </div>
                     </div>
                 </form>

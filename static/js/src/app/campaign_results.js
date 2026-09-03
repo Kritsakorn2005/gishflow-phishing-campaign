@@ -67,6 +67,18 @@ var statuses = {
         icon: "fa-exclamation",
         point: "ct-point-clicked"
     },
+    "Viewed Training": {
+        color: "#30d158",
+        label: "label-success",
+        icon: "fa-graduation-cap",
+        point: "ct-point-reported"
+    },
+    "QR Scanned": {
+        color: "#5e5ce6",
+        label: "label-clicked",
+        icon: "fa-qrcode",
+        point: "ct-point-clicked"
+    },
     "Unknown": {
         color: "#6c7a89",
         label: "label-default",
@@ -611,13 +623,29 @@ var updateMap = function (results) {
  * @param {string} status 
  * @param {moment(datetime)} send_date 
  */
+// channelLabel relabels the email-centric status text for the campaign's actual
+// delivery channel, so an SMS or LINE campaign reads "SMS Sent" / "LINE Read"
+// instead of "Email Sent" / "Email Opened".
+function channelLabel(status) {
+    if (!campaign.smtp) return status
+    var it = campaign.smtp.interface_type
+    if (it != "LINE" && it != "SMS") return status
+    var map = {
+        "Email Sent": it + " Sent",
+        "Email Opened": it + " Read",
+        "Email Reported": it + " Reported"
+    }
+    return map[status] || status
+}
+
 function createStatusLabel(status, send_date) {
-    var label = statuses[status].label || "label-default";
-    var statusColumn = "<span class=\"label " + label + "\">" + status + "</span>"
+    var label = (statuses[status] && statuses[status].label) || "label-default";
+    var displayStatus = channelLabel(status)
+    var statusColumn = "<span class=\"label " + label + "\">" + displayStatus + "</span>"
     // Add the tooltip if the email is scheduled to be sent
     if (status == "Scheduled" || status == "Retrying") {
         var sendDateMessage = "Scheduled to send at " + send_date
-        statusColumn = "<span class=\"label " + label + "\" data-toggle=\"tooltip\" data-placement=\"top\" data-html=\"true\" title=\"" + sendDateMessage + "\">" + status + "</span>"
+        statusColumn = "<span class=\"label " + label + "\" data-toggle=\"tooltip\" data-placement=\"top\" data-html=\"true\" title=\"" + sendDateMessage + "\">" + displayStatus + "</span>"
     }
     return statusColumn
 }
@@ -697,7 +725,7 @@ function poll() {
                 var rid = rowData[0]
                 $.each(campaign.results, function (j, result) {
                     if (result.id == rid) {
-                        rowData[8] = moment(result.send_date).format('MMMM Do YYYY, h:mm:ss a')
+                        rowData[10] = moment(result.send_date).format('MMMM Do YYYY, h:mm:ss a')
                         rowData[7] = result.reported
                         rowData[6] = result.status
                         resultsTable.row(i).data(rowData)
@@ -764,11 +792,11 @@ function load() {
                             "targets": [1]
                         }, {
                             "visible": false,
-                            "targets": [0, 8]
+                            "targets": [0]
                         },
                         {
                             "render": function (data, type, row) {
-                                return createStatusLabel(data, row[8])
+                                return createStatusLabel(data, row[10])
                             },
                             "targets": [6]
                         },
@@ -803,6 +831,8 @@ function load() {
                         escapeHtml(result.position) || "",
                         result.status,
                         result.reported,
+                        escapeHtml(result.line_id) || "",
+                        escapeHtml(result.phone) || "",
                         moment(result.send_date).format('MMMM Do YYYY, h:mm:ss a')
                     ])
                     email_series_data[result.status]++;
@@ -871,7 +901,7 @@ function load() {
                     })
                     var chart = renderPieChart({
                         elemId: statusMapping[status] + '_chart',
-                        title: status,
+                        title: channelLabel(status),
                         name: status,
                         data: email_data,
                         colors: [statuses[status].color, '#dddddd']

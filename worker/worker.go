@@ -100,6 +100,13 @@ func (w *DefaultWorker) processCampaigns(t time.Time) error {
 				w.sendViaLine(c, msc)
 				return
 			}
+			if c.SMTP.Interface == models.InterfaceSMS {
+				log.WithFields(logrus.Fields{
+					"num_messages": len(msc),
+				}).Info("Sending SMS messages")
+				w.sendViaSMS(c, msc)
+				return
+			}
 			log.WithFields(logrus.Fields{
 				"num_emails": len(msc),
 			}).Info("Sending emails to mailer for processing")
@@ -154,9 +161,13 @@ func (w *DefaultWorker) LaunchCampaign(c models.Campaign) {
 		}
 		mailEntries = append(mailEntries, m)
 	}
-	// GishFlow: deliver via LINE if this is a LINE channel campaign.
+	// GishFlow: deliver via LINE or SMS if this is a non-email channel campaign.
 	if campaignMailCtx.SMTP.Interface == models.InterfaceLine {
 		w.sendViaLine(campaignMailCtx, mailEntries)
+		return
+	}
+	if campaignMailCtx.SMTP.Interface == models.InterfaceSMS {
+		w.sendViaSMS(campaignMailCtx, mailEntries)
 		return
 	}
 	w.mailer.Queue(mailEntries)
@@ -186,6 +197,54 @@ func (w *DefaultWorker) sendViaLine(c models.Campaign, msc []mailer.Mail) {
 			continue
 		}
 		if err := models.SendLineMessage(token, to, text); err != nil {
+			log.Error(err)
+			m.Error(err)
+			continue
+		}
+		if err := m.Success(); err != nil {
+			log.Error(err)
+		}
+	}
+}
+
+// sendViaSMS delivers a batch of maillogs through the ThaiBulkSMS API. It
+// renders each recipient's message and sends it to their phone number, reusing
+// the existing result/maillog bookkeeping so tracking works as for email.
+func (w *DefaultWorker) sendViaSMS(c models.Campaign, msc []mailer.Mail) {
+	apiKey := c.SMTP.Username
+	apiSecret := c.SMTP.Password
+	sender := c.SMTP.FromAddress
+	// GishFlow: for SMS profiles the IgnoreCertErrors flag is reused as a
+	// "mock mode" switch - when on, we log the message and mark it sent without
+	// calling ThaiBulkSMS, so the flow can be tested without spending credits.
+	mock := c.SMTP.IgnoreCertErrors
+	for _, entry := range msc {
+		m, ok := entry.(*models.MailLog)
+		if !ok {
+			entry.Error(fmt.Errorf("unexpected mail type for SMS channel"))
+			continue
+		}
+		to, text, err := m.GenerateSMS()
+		if err != nil {
+			log.Error(err)
+			m.Error(err)
+			continue
+		}
+		if to == "" {
+			m.Error(fmt.Errorf("recipient has no phone number"))
+			continue
+		}
+		if mock {
+			log.WithFields(logrus.Fields{
+				"to":      to,
+				"message": text,
+			}).Info("SMS mock mode - message not actually sent")
+			if err := m.Success(); err != nil {
+				log.Error(err)
+			}
+			continue
+		}
+		if err := models.SendThaiBulkSMS(apiKey, apiSecret, sender, to, text); err != nil {
 			log.Error(err)
 			m.Error(err)
 			continue

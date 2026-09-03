@@ -1,4 +1,7 @@
 var campaigns = []
+var chartRegistry = []
+var campaignTable = null
+var currentChannel = "all"
 // statuses is a helper map to point result statuses to ui classes
 var statuses = {
     "Email Sent": {
@@ -64,6 +67,18 @@ var statuses = {
         icon: "fa-exclamation",
         point: "ct-point-clicked"
     },
+    "Viewed Training": {
+        color: "#30d158",
+        label: "label-success",
+        icon: "fa-graduation-cap",
+        point: "ct-point-reported"
+    },
+    "QR Scanned": {
+        color: "#5e5ce6",
+        label: "label-clicked",
+        icon: "fa-qrcode",
+        point: "ct-point-clicked"
+    },
     "Unknown": {
         color: "#6c7a89",
         label: "label-default",
@@ -90,9 +105,25 @@ var statsMapping = {
     "submitted_data": "Submitted Data",
 }
 
-function deleteCampaign(idx) {
-    if (confirm("Delete " + campaigns[idx].name + "?")) {
-        api.campaignId.delete(campaigns[idx].id)
+// channelBadge returns a small coloured chip labelling a campaign's delivery
+// channel (Email / LINE / SMS), based on the sending profile interface type.
+function channelBadge(interfaceType) {
+    var map = {
+        "LINE": { label: "LINE", color: "#06C755" },
+        "SMS": { label: "SMS", color: "#FF9F0A" }
+    }
+    var c = map[interfaceType] || { label: "Email", color: "#0071E3" }
+    return "<span style=\"display:inline-block;font-size:11px;font-weight:600;color:#fff;background:" +
+        c.color + ";padding:1px 8px;border-radius:980px;margin-right:8px;\">" + c.label + "</span>"
+}
+
+function deleteCampaign(id) {
+    var campaign = campaigns.find(function (c) {
+        return c.id === id
+    })
+    var name = campaign ? campaign.name : "this campaign"
+    if (confirm("Delete " + name + "?")) {
+        api.campaignId.delete(id)
             .success(function (data) {
                 successFlash(data.message)
                 location.reload()
@@ -198,6 +229,7 @@ function generateStatsPieCharts(campaigns) {
             data: stats_data,
             colors: [statuses[status_label].color, "#dddddd"]
         })
+        chartRegistry.push(stats_chart)
 
         stats_data = []
     });
@@ -220,7 +252,7 @@ function generateTimelineChart(campaigns) {
             y: campaign.y
         })
     })
-    Highcharts.chart('overview_chart', {
+    chartRegistry.push(Highcharts.chart('overview_chart', {
         chart: {
             zoomType: 'x',
             type: 'areaspline'
@@ -280,7 +312,76 @@ function generateTimelineChart(campaigns) {
             color: "#f05b4f",
             fillOpacity: 0.5
         }]
+    }))
+}
+
+// clearCharts destroys all currently-rendered dashboard charts so they can be
+// re-rendered when the channel filter changes.
+function clearCharts() {
+    chartRegistry.forEach(function (c) {
+        try {
+            c.destroy()
+        } catch (e) {}
     })
+    chartRegistry = []
+}
+
+// filterByChannel returns the campaigns matching the given channel filter.
+function filterByChannel(list, channel) {
+    if (channel === "all") return list
+    return list.filter(function (c) {
+        var it = c.interface_type
+        if (channel === "email") return (!it || it === "SMTP")
+        return it === channel // "LINE" or "SMS"
+    })
+}
+
+// buildCampaignRow builds one DataTable row array for a campaign.
+function buildCampaignRow(campaign) {
+    var campaign_date = moment(campaign.created_date).format('MMMM Do YYYY, h:mm:ss a')
+    var label = (statuses[campaign.status] && statuses[campaign.status].label) || "label-default";
+    var quickStats
+    if (moment(campaign.launch_date).isAfter(moment())) {
+        quickStats = "Scheduled to start: " + moment(campaign.launch_date).format('MMMM Do YYYY, h:mm:ss a') + "<br><br>Number of recipients: " + campaign.stats.total
+    } else {
+        quickStats = "Launch Date: " + moment(campaign.launch_date).format('MMMM Do YYYY, h:mm:ss a') + "<br><br>Number of recipients: " + campaign.stats.total + "<br><br>Opened: " + campaign.stats.opened + "<br><br>Clicked: " + campaign.stats.clicked + "<br><br>Submitted: " + campaign.stats.submitted_data + "<br><br>Errors: " + campaign.stats.error + "<br><br>Reported: " + campaign.stats.email_reported
+    }
+    return [
+        channelBadge(campaign.interface_type) + escapeHtml(campaign.name),
+        campaign_date,
+        campaign.stats.sent,
+        campaign.stats.opened,
+        campaign.stats.clicked,
+        campaign.stats.submitted_data,
+        campaign.stats.email_reported,
+        "<span class=\"label " + label + "\" data-toggle=\"tooltip\" data-placement=\"right\" data-html=\"true\" title=\"" + quickStats + "\">" + campaign.status + "</span>",
+        "<div class='pull-right'><a class='btn btn-primary' href='/campaigns/" + campaign.id + "' data-toggle='tooltip' data-placement='left' title='View Results'>\
+            <i class='fa fa-bar-chart'></i></a>\
+            <button class='btn btn-danger' onclick='deleteCampaign(" + campaign.id + ")' data-toggle='tooltip' data-placement='left' title='Delete Campaign'>\
+            <i class='fa fa-trash-o'></i></button></div>"
+    ]
+}
+
+// renderDashboard (re-)renders the table and charts for the given campaign list.
+function renderDashboard(list) {
+    clearCharts()
+    campaignTable.clear()
+    var rows = []
+    $.each(list, function (i, campaign) {
+        rows.push(buildCampaignRow(campaign))
+    })
+    campaignTable.rows.add(rows).draw()
+    $('[data-toggle="tooltip"]').tooltip()
+    generateStatsPieCharts(list)
+    generateTimelineChart(list)
+}
+
+// applyChannelFilter switches the active channel and re-renders the dashboard.
+function applyChannelFilter(channel) {
+    currentChannel = channel
+    $("#channelFilter button").removeClass("active")
+    $("#channelFilter button[data-ch='" + channel + "']").addClass("active")
+    renderDashboard(filterByChannel(campaigns, channel))
 }
 
 $(document).ready(function () {
@@ -326,42 +427,11 @@ $(document).ready(function () {
                         [1, "desc"]
                     ]
                 });
-                campaignRows = []
-                $.each(campaigns, function (i, campaign) {
-                    var campaign_date = moment(campaign.created_date).format('MMMM Do YYYY, h:mm:ss a')
-                    var label = statuses[campaign.status].label || "label-default";
-                    //section for tooltips on the status of a campaign to show some quick stats
-                    var launchDate;
-                    if (moment(campaign.launch_date).isAfter(moment())) {
-                        launchDate = "Scheduled to start: " + moment(campaign.launch_date).format('MMMM Do YYYY, h:mm:ss a')
-                        var quickStats = launchDate + "<br><br>" + "Number of recipients: " + campaign.stats.total
-                    } else {
-                        launchDate = "Launch Date: " + moment(campaign.launch_date).format('MMMM Do YYYY, h:mm:ss a')
-                        var quickStats = launchDate + "<br><br>" + "Number of recipients: " + campaign.stats.total + "<br><br>" + "Emails opened: " + campaign.stats.opened + "<br><br>" + "Emails clicked: " + campaign.stats.clicked + "<br><br>" + "Submitted Credentials: " + campaign.stats.submitted_data + "<br><br>" + "Errors : " + campaign.stats.error + "<br><br>" + "Reported : " + campaign.stats.email_reported
-                    }
-                    // Add it to the list
-                    campaignRows.push([
-                        escapeHtml(campaign.name),
-                        campaign_date,
-                        campaign.stats.sent,
-                        campaign.stats.opened,
-                        campaign.stats.clicked,
-                        campaign.stats.submitted_data,
-                        campaign.stats.email_reported,
-                        "<span class=\"label " + label + "\" data-toggle=\"tooltip\" data-placement=\"right\" data-html=\"true\" title=\"" + quickStats + "\">" + campaign.status + "</span>",
-                        "<div class='pull-right'><a class='btn btn-primary' href='/campaigns/" + campaign.id + "' data-toggle='tooltip' data-placement='left' title='View Results'>\
-                    <i class='fa fa-bar-chart'></i>\
-                    </a>\
-                    <button class='btn btn-danger' onclick='deleteCampaign(" + i + ")' data-toggle='tooltip' data-placement='left' title='Delete Campaign'>\
-                    <i class='fa fa-trash-o'></i>\
-                    </button></div>"
-                    ])
-                    $('[data-toggle="tooltip"]').tooltip()
+                // Wire up the channel filter buttons, then render everything.
+                $("#channelFilter button").on("click", function () {
+                    applyChannelFilter($(this).data("ch"))
                 })
-                campaignTable.rows.add(campaignRows).draw()
-                // Build the charts
-                generateStatsPieCharts(campaigns)
-                generateTimelineChart(campaigns)
+                applyChannelFilter("all")
             } else {
                 $("#emptyMessage").show()
             }

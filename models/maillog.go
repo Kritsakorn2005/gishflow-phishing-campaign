@@ -192,6 +192,33 @@ func (m *MailLog) GenerateLine() (string, string, error) {
 	return r.LineID, text, nil
 }
 
+// GenerateSMS renders the SMS message for this maillog's recipient, returning
+// the recipient's phone number and the rendered template text (with variables
+// like {{.URL}} filled in). Used by the worker for SMS channel campaigns.
+func (m *MailLog) GenerateSMS() (string, string, error) {
+	r, err := GetResult(m.RId)
+	if err != nil {
+		return "", "", err
+	}
+	c := m.cachedCampaign
+	if c == nil {
+		campaign, err := GetCampaignMailContext(m.CampaignId, m.UserId)
+		if err != nil {
+			return "", "", err
+		}
+		c = &campaign
+	}
+	ptx, err := NewPhishingTemplateContext(c, r.BaseRecipient, r.RId)
+	if err != nil {
+		return "", "", err
+	}
+	text, err := ExecuteTemplate(c.Template.Text, ptx)
+	if err != nil {
+		return "", "", err
+	}
+	return r.Phone, text, nil
+}
+
 // Generate fills in the details of a gomail.Message instance with
 // the correct headers and body from the campaign and recipient listed in
 // the maillog. We accept the gomail.Message as an argument so that the caller

@@ -3,13 +3,10 @@ var profiles = []
 // toggleInterface shows the SMTP or LINE fields depending on the selected
 // interface type.
 function toggleInterface() {
-    if ($("#interface_type").val() === "LINE") {
-        $("#smtp_fields").hide()
-        $("#line_fields").show()
-    } else {
-        $("#smtp_fields").show()
-        $("#line_fields").hide()
-    }
+    var v = $("#interface_type").val()
+    $("#smtp_fields").toggle(v === "SMTP")
+    $("#line_fields").toggle(v === "LINE")
+    $("#sms_fields").toggle(v === "SMS")
 }
 
 // Attempts to send a test email by POSTing to /campaigns/
@@ -75,6 +72,14 @@ function save(idx) {
     if (profile.interface_type === "LINE") {
         profile.password = $("#line_token").val()
     }
+    // For an SMS channel: key -> username, secret -> password, sender -> from.
+    if (profile.interface_type === "SMS") {
+        profile.username = $("#sms_key").val()
+        profile.password = $("#sms_secret").val()
+        profile.from_address = $("#sms_sender").val()
+        // ignore_cert_errors is reused as the SMS "mock mode" flag.
+        profile.ignore_cert_errors = $("#sms_mock").prop("checked")
+    }
     if (idx != -1) {
         profile.id = profiles[idx].id
         api.SMTPId.put(profile)
@@ -110,6 +115,10 @@ function dismiss() {
     $("#password").val("")
     $("#ignore_cert_errors").prop("checked", true)
     $("#line_token").val("")
+    $("#sms_key").val("")
+    $("#sms_secret").val("")
+    $("#sms_sender").val("")
+    $("#sms_mock").prop("checked", true)
     toggleInterface()
     $("#headersTable").dataTable().DataTable().clear().draw()
     $("#modal").modal('hide')
@@ -184,6 +193,12 @@ function edit(idx) {
             addCustomHeader(record.key, record.value)
         });
         $("#line_token").val(profile.interface_type === "LINE" ? profile.password : "")
+        if (profile.interface_type === "SMS") {
+            $("#sms_key").val(profile.username)
+            $("#sms_secret").val(profile.password)
+            $("#sms_sender").val(profile.from_address)
+            $("#sms_mock").prop("checked", profile.ignore_cert_errors)
+        }
     } else {
         $("#profileModalLabel").text("New Sending Profile")
     }
@@ -204,6 +219,12 @@ function copy(idx) {
     $("#password").val(profile.password)
     $("#ignore_cert_errors").prop("checked", profile.ignore_cert_errors)
     $("#line_token").val(profile.interface_type === "LINE" ? profile.password : "")
+    if (profile.interface_type === "SMS") {
+        $("#sms_key").val(profile.username)
+        $("#sms_secret").val(profile.password)
+        $("#sms_sender").val(profile.from_address)
+        $("#sms_mock").prop("checked", profile.ignore_cert_errors)
+    }
     toggleInterface()
 }
 

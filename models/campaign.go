@@ -59,6 +59,7 @@ type CampaignSummary struct {
 	CompletedDate time.Time     `json:"completed_date"`
 	Status        string        `json:"status"`
 	Name          string        `json:"name"`
+	InterfaceType string        `json:"interface_type"`
 	Stats         CampaignStats `json:"stats"`
 }
 
@@ -337,9 +338,11 @@ func GetCampaigns(uid int64) ([]Campaign, error) {
 func GetCampaignSummaries(uid int64) (CampaignSummaries, error) {
 	overview := CampaignSummaries{}
 	cs := []CampaignSummary{}
-	// Get the basic campaign information
-	query := db.Table("campaigns").Where("user_id = ?", uid)
-	query = query.Select("id, name, created_date, launch_date, send_by_date, completed_date, status")
+	// Get the basic campaign information, including the sending profile's
+	// interface type so the dashboard can categorise by channel.
+	query := db.Table("campaigns").Where("campaigns.user_id = ?", uid).
+		Joins("left join smtp on smtp.id = campaigns.smtp_id")
+	query = query.Select("campaigns.id, campaigns.name, campaigns.created_date, campaigns.launch_date, campaigns.send_by_date, campaigns.completed_date, campaigns.status, smtp.interface_type")
 	err := query.Scan(&cs).Error
 	if err != nil {
 		log.Error(err)
@@ -588,6 +591,7 @@ func PostCampaign(c *Campaign, uid int64) error {
 					FirstName: t.FirstName,
 					LastName:  t.LastName,
 					LineID:    t.LineID,
+					Phone:     t.Phone,
 				},
 				Status:       StatusScheduled,
 				CampaignId:   c.Id,
