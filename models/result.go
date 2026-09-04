@@ -35,6 +35,8 @@ type Result struct {
 	SendDate     time.Time `json:"send_date"`
 	Reported     bool      `json:"reported" sql:"not null"`
 	Trained      bool      `json:"trained" sql:"not null"`
+	QuizScore    int       `json:"quiz_score"`
+	QuizTotal    int       `json:"quiz_total"`
 	ModifiedDate time.Time `json:"modified_date"`
 	BaseRecipient
 }
@@ -157,6 +159,21 @@ func (r *Result) HandleTrainingViewed(details EventDetails) error {
 	if err != nil {
 		return err
 	}
+	r.Trained = true
+	r.ModifiedDate = event.Time
+	return db.Save(r).Error
+}
+
+// HandleTrainingCompleted records that the recipient finished the training
+// quiz, storing their score and marking them trained. It's recorded each time
+// the quiz is submitted so a later, better attempt updates the stored score.
+func (r *Result) HandleTrainingCompleted(details EventDetails, score, total int) error {
+	event, err := r.createEvent(EventTrainingDone, details)
+	if err != nil {
+		return err
+	}
+	r.QuizScore = score
+	r.QuizTotal = total
 	r.Trained = true
 	r.ModifiedDate = event.Time
 	return db.Save(r).Error

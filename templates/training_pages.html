@@ -41,7 +41,7 @@
 </div>
 <!-- Modal -->
 <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="dismiss()"><span
@@ -60,6 +60,13 @@
                         <textarea id="html_editor"></textarea>
                     </div>
                 </div>
+                <hr>
+                <label class="control-label">Quiz
+                    <small class="text-muted">(optional — shown as questions below the training content)</small>
+                </label>
+                <div id="quizBuilder"></div>
+                <button type="button" class="btn btn-default btn-sm" id="addQuestionBtn">
+                    <i class="fa fa-plus"></i> Add question</button>
             </div>
             <div class="modal-footer">
                 <button type="button" data-dismiss="modal" class="btn btn-default" onclick="dismiss()">Cancel</button>

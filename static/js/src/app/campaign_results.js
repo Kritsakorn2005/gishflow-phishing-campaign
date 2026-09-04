@@ -73,6 +73,12 @@ var statuses = {
         icon: "fa-graduation-cap",
         point: "ct-point-reported"
     },
+    "Completed Training": {
+        color: "#248a3d",
+        label: "label-success",
+        icon: "fa-check-circle",
+        point: "ct-point-reported"
+    },
     "QR Scanned": {
         color: "#5e5ce6",
         label: "label-clicked",

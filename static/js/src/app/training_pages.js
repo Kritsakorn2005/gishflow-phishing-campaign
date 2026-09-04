@@ -4,6 +4,78 @@
     (teachable-moment) pages.
 */
 var pages = []
+var quizQid = 0
+
+// addChoice appends one answer choice (radio + text) to a question block.
+function addChoice($q, text, correct) {
+    var name = "correct-" + $q.data("qid")
+    var $c = $('<div class="gfq-choice" style="display:flex;align-items:center;margin:4px 0;">' +
+        '<input type="radio" name="' + name + '" class="gfq-correct" title="Mark as correct answer"' + (correct ? ' checked' : '') + '>' +
+        '<input type="text" class="form-control gfq-choice-text" placeholder="Answer choice" style="margin:0 8px;">' +
+        '<button type="button" class="btn btn-link btn-xs gfq-del-choice" title="Remove choice">&times;</button>' +
+        '</div>')
+    $c.find(".gfq-choice-text").val(text || "")
+    $q.find(".gfq-choices").append($c)
+}
+
+// addQuestion appends a question block. Pass a {q, choices, answer} object to
+// pre-fill it (editing), or nothing for a blank question with two choices.
+function addQuestion(q) {
+    quizQid++
+    var $q = $('<div class="gf-quiz-q panel panel-default" data-qid="' + quizQid + '" style="padding:12px;margin-bottom:10px;">' +
+        '<div class="form-group" style="margin-bottom:8px;">' +
+        '<input type="text" class="form-control gfq-text" placeholder="Question"></div>' +
+        '<div class="gfq-choices"></div>' +
+        '<button type="button" class="btn btn-default btn-xs gfq-add-choice" style="margin-top:6px;"><i class="fa fa-plus"></i> Add choice</button>' +
+        '<button type="button" class="btn btn-danger btn-xs gfq-del-q pull-right" style="margin-top:6px;">Remove question</button>' +
+        '</div>')
+    $("#quizBuilder").append($q)
+    if (q) {
+        $q.find(".gfq-text").val(q.q)
+        $.each(q.choices, function (j, c) {
+            addChoice($q, c, j === q.answer)
+        })
+    } else {
+        addChoice($q, "", true)
+        addChoice($q, "", false)
+    }
+}
+
+// collectQuiz reads the builder DOM into an array of quiz questions. Questions
+// without text or with fewer than two choices are skipped.
+function collectQuiz() {
+    var out = []
+    $("#quizBuilder .gf-quiz-q").each(function () {
+        var qtext = $(this).find(".gfq-text").val().trim()
+        var choices = []
+        var answer = 0
+        $(this).find(".gfq-choice").each(function (j) {
+            choices.push($(this).find(".gfq-choice-text").val())
+            if ($(this).find(".gfq-correct").is(":checked")) {
+                answer = j
+            }
+        })
+        if (qtext && choices.length >= 2) {
+            out.push({ q: qtext, choices: choices, answer: answer })
+        }
+    })
+    return out
+}
+
+// renderQuiz clears and repopulates the builder from a stored quiz JSON string.
+function renderQuiz(quizStr) {
+    $("#quizBuilder").empty()
+    quizQid = 0
+    if (!quizStr) {
+        return
+    }
+    try {
+        var arr = JSON.parse(quizStr)
+        $.each(arr, function (i, q) {
+            addQuestion(q)
+        })
+    } catch (e) { /* malformed quiz, start empty */ }
+}
 
 // save attempts to POST or PUT a training page to /api/training/
 function save(idx) {
@@ -11,6 +83,8 @@ function save(idx) {
     page.name = $("#name").val()
     editor = CKEDITOR.instances["html_editor"]
     page.html = editor.getData()
+    var quiz = collectQuiz()
+    page.quiz = quiz.length > 0 ? JSON.stringify(quiz) : ""
     if (idx != -1) {
         page.id = pages[idx].id
         api.trainingId.put(page)
@@ -39,6 +113,7 @@ function dismiss() {
     $("#modal\\.flashes").empty()
     $("#name").val("")
     $("#html_editor").val("")
+    $("#quizBuilder").empty()
     $("#modal").modal('hide')
 }
 
@@ -90,8 +165,10 @@ function edit(idx) {
         page = pages[idx]
         $("#name").val(page.name)
         $("#html_editor").val(page.html)
+        renderQuiz(page.quiz)
     } else {
         $("#modalLabel").text("New Training Page")
+        renderQuiz("")
     }
 }
 
@@ -103,6 +180,7 @@ function copy(idx) {
     var page = pages[idx]
     $("#name").val("Copy of " + page.name)
     $("#html_editor").val(page.html)
+    renderQuiz(page.quiz)
 }
 
 function load() {
@@ -155,6 +233,19 @@ $(document).ready(function () {
     $('#modal').on('hidden.bs.modal', function (event) {
         dismiss()
     });
+    // Quiz builder controls (delegated so they work for dynamic questions)
+    $("#addQuestionBtn").on("click", function () {
+        addQuestion()
+    })
+    $("#quizBuilder").on("click", ".gfq-add-choice", function () {
+        addChoice($(this).closest(".gf-quiz-q"), "", false)
+    })
+    $("#quizBuilder").on("click", ".gfq-del-choice", function () {
+        $(this).closest(".gfq-choice").remove()
+    })
+    $("#quizBuilder").on("click", ".gfq-del-q", function () {
+        $(this).closest(".gf-quiz-q").remove()
+    })
     CKEDITOR.on('dialogDefinition', function (ev) {
         var dialogName = ev.data.name;
         var dialogDefinition = ev.data.definition;

@@ -5,8 +5,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"html"
 	"net"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -239,6 +241,25 @@ func (ps *PhishingServer) PhishHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// GishFlow: a submission of the training-page quiz. Grade it, record the
+	// completion + score, and show the results page — rather than letting it
+	// fall through and be recorded as another landing-page form submit.
+	if r.Form.Get("__gfquiz") == "1" && c.TrainingId != 0 {
+		tp, terr := models.GetTrainingPage(c.TrainingId, c.UserId)
+		if terr == nil && len(tp.Questions()) > 0 {
+			answers := parseQuizAnswers(r)
+			score, total := tp.GradeQuiz(answers)
+			// Record the score in the event details so it's visible on the
+			// recipient's timeline in Campaign Results.
+			d.Payload.Set("quiz_score", strconv.Itoa(score)+"/"+strconv.Itoa(total))
+			if terr = rs.HandleTrainingCompleted(d, score, total); terr != nil {
+				log.Error(terr)
+			}
+			renderQuizResult(w, tp, answers, score, total)
+			return
+		}
+	}
+
 	p, err := models.GetPage(c.PageId, c.UserId)
 	if err != nil {
 		log.Error(err)
@@ -282,13 +303,22 @@ func (ps *PhishingServer) PhishHandler(w http.ResponseWriter, r *http.Request) {
 				if terr = rs.HandleTrainingViewed(d); terr != nil {
 					log.Error(terr)
 				}
-				html, terr := models.ExecuteTemplate(tp.HTML, ptx)
+				body, terr := models.ExecuteTemplate(tp.HTML, ptx)
 				if terr != nil {
 					log.Error(terr)
 					http.NotFound(w, r)
 					return
 				}
-				w.Write([]byte(html))
+				// If the training page has a quiz, append the interactive form
+				// so the recipient can complete the teachable moment.
+				if qs := tp.Questions(); len(qs) > 0 {
+					body += buildQuizForm(qs, rs.RId)
+				}
+				// Set the content type explicitly: training content often starts
+				// with non-markup text (e.g. Thai), which would otherwise be
+				// sniffed as text/plain and shown as raw HTML source.
+				w.Header().Set("Content-Type", "text/html; charset=utf-8")
+				w.Write([]byte(body))
 				return
 			}
 		}
@@ -327,6 +357,100 @@ func renderPhishResponse(w http.ResponseWriter, r *http.Request, ptx models.Phis
 // RobotsHandler prevents search engines, etc. from indexing phishing materials
 func (ps *PhishingServer) RobotsHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "User-agent: *\nDisallow: /")
+}
+
+// quizStyle is the shared, self-contained styling for the quiz form and the
+// results page. These are served from the phishing domain, so they can't rely
+// on the admin theme stylesheet and must inline everything.
+const quizStyle = `<style>
+.gf-quiz{max-width:640px;margin:24px auto;padding:28px 30px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  background:#fff;border:1px solid #e5e5ea;border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.06);color:#1d1d1f}
+.gf-quiz h2{margin:0 0 6px;font-size:22px;font-weight:600}
+.gf-quiz p.gf-lead{margin:0 0 20px;color:#6e6e73;font-size:14px}
+.gf-q{margin:0 0 20px;padding:0 0 18px;border-bottom:1px solid #f0f0f2}
+.gf-q:last-of-type{border-bottom:0}
+.gf-q .gf-qt{font-weight:600;margin:0 0 12px;font-size:15px}
+.gf-opt{display:block;padding:10px 14px;margin:6px 0;border:1px solid #e5e5ea;border-radius:10px;cursor:pointer;font-size:14px;transition:.15s}
+.gf-opt:hover{background:#f5f5f7}
+.gf-opt input{margin-right:10px}
+.gf-opt.correct{border-color:#30d158;background:#eafbef}
+.gf-opt.wrong{border-color:#ff3b30;background:#ffeeed}
+.gf-btn{display:inline-block;background:#0071e3;color:#fff;border:0;border-radius:980px;padding:11px 26px;font-size:15px;font-weight:500;cursor:pointer}
+.gf-btn:hover{background:#0077ed}
+.gf-score{font-size:34px;font-weight:700;margin:4px 0 2px}
+.gf-badge{display:inline-block;padding:4px 14px;border-radius:980px;font-size:13px;font-weight:600;margin-bottom:14px}
+.gf-pass{background:#eafbef;color:#248a3d}
+.gf-fail{background:#fff4e5;color:#c05600}
+</style>`
+
+// parseQuizAnswers pulls the recipient's quiz answers out of the request form.
+// Inputs are named "gfq_<index>" with the chosen choice index as the value.
+func parseQuizAnswers(r *http.Request) map[string]int {
+	answers := map[string]int{}
+	for k, v := range r.Form {
+		if strings.HasPrefix(k, "gfq_") && len(v) > 0 {
+			if n, err := strconv.Atoi(v[0]); err == nil {
+				answers[strings.TrimPrefix(k, "gfq_")] = n
+			}
+		}
+	}
+	return answers
+}
+
+// buildQuizForm renders the interactive quiz that is appended below the
+// training content. It posts back to the same URL with a "__gfquiz" marker.
+func buildQuizForm(qs []models.QuizQuestion, rid string) string {
+	var b strings.Builder
+	b.WriteString(quizStyle)
+	b.WriteString(`<div class="gf-quiz"><h2>Quick knowledge check</h2>`)
+	b.WriteString(`<p class="gf-lead">Answer these questions to complete your training.</p>`)
+	b.WriteString(`<form method="post" action="">`)
+	b.WriteString(`<input type="hidden" name="__gfquiz" value="1">`)
+	b.WriteString(`<input type="hidden" name="` + models.RecipientParameter + `" value="` + html.EscapeString(rid) + `">`)
+	for i, q := range qs {
+		b.WriteString(`<div class="gf-q"><div class="gf-qt">` + strconv.Itoa(i+1) + `. ` + html.EscapeString(q.Q) + `</div>`)
+		for j, choice := range q.Choices {
+			name := "gfq_" + strconv.Itoa(i)
+			b.WriteString(`<label class="gf-opt"><input type="radio" name="` + name + `" value="` + strconv.Itoa(j) + `">` + html.EscapeString(choice) + `</label>`)
+		}
+		b.WriteString(`</div>`)
+	}
+	b.WriteString(`<button type="submit" class="gf-btn">Submit answers</button></form></div>`)
+	return b.String()
+}
+
+// renderQuizResult writes the graded results page, showing the recipient's
+// score and highlighting the correct answer for each question.
+func renderQuizResult(w http.ResponseWriter, tp models.TrainingPage, answers map[string]int, score, total int) {
+	qs := tp.Questions()
+	passed := total > 0 && score*100/total >= 60
+	badgeClass, badgeText := "gf-fail", "Keep practicing"
+	if passed {
+		badgeClass, badgeText = "gf-pass", "Passed"
+	}
+	var b strings.Builder
+	b.WriteString(quizStyle)
+	b.WriteString(`<div class="gf-quiz"><h2>Your results</h2>`)
+	b.WriteString(`<span class="gf-badge ` + badgeClass + `">` + badgeText + `</span>`)
+	b.WriteString(`<div class="gf-score">` + strconv.Itoa(score) + ` / ` + strconv.Itoa(total) + `</div>`)
+	b.WriteString(`<p class="gf-lead">Review the correct answers below.</p>`)
+	for i, q := range qs {
+		chosen, answered := answers[strconv.Itoa(i)]
+		b.WriteString(`<div class="gf-q"><div class="gf-qt">` + strconv.Itoa(i+1) + `. ` + html.EscapeString(q.Q) + `</div>`)
+		for j, choice := range q.Choices {
+			cls := "gf-opt"
+			if j == q.Answer {
+				cls += " correct"
+			} else if answered && j == chosen {
+				cls += " wrong"
+			}
+			b.WriteString(`<div class="` + cls + `">` + html.EscapeString(choice) + `</div>`)
+		}
+		b.WriteString(`</div>`)
+	}
+	b.WriteString(`</div>`)
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Write([]byte(b.String()))
 }
 
 // TransparencyHandler returns a TransparencyResponse for the provided result
