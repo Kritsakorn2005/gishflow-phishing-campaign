@@ -113,6 +113,11 @@ h1,h2,h3,h4,h5{font-family:var(--gf-font); letter-spacing:-.02em; color:var(--gf
 .dataTables_wrapper .dataTables_paginate .paginate_button{border-radius:var(--gf-r-sm)!important; border:0!important; color:var(--gf-text-2)!important}
 .dataTables_wrapper .dataTables_paginate .paginate_button.current{background:var(--gf-accent)!important; color:#fff!important}
 .dataTables_wrapper .dataTables_info{color:var(--gf-text-3)}
+/* Breathing room for the DataTable control rows (Show entries / Search / info /
+   pagination) inside a card — Bootstrap's negative row margin otherwise pins
+   them flush against the card edge. Middle (table) row is left untouched. */
+.gf-card .dataTables_wrapper>.row:first-child{padding:16px 18px 8px}
+.gf-card .dataTables_wrapper>.row:last-child{padding:10px 18px 16px}
 
 /* ---------- Forms ---------- */
 .form-control{

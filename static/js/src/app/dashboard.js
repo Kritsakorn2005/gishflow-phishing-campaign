@@ -105,6 +105,19 @@ var statsMapping = {
     "submitted_data": "Submitted Data",
 }
 
+// channelLabel adapts a stat label to the active channel filter, so a LINE
+// campaign shows "LINE Sent" / "LINE Read" instead of the email wording.
+// Returns the label unchanged for Email / All so the statuses lookup still works.
+function channelLabel(label, channel) {
+    if (channel !== "LINE" && channel !== "SMS") return label
+    var map = {
+        "Email Sent": channel + " Sent",
+        "Email Opened": channel + " Read",
+        "Email Reported": channel + " Reported"
+    }
+    return map[label] || label
+}
+
 // channelBadge returns a small coloured chip labelling a campaign's delivery
 // channel (Email / LINE / SMS), based on the sending profile interface type.
 function channelBadge(interfaceType) {
@@ -213,8 +226,9 @@ function generateStatsPieCharts(campaigns) {
             return true
         }
         status_label = statsMapping[status]
+        var display_label = channelLabel(status_label, currentChannel)
         stats_data.push({
-            name: status_label,
+            name: display_label,
             y: Math.floor((count / total) * 100),
             count: count
         })
@@ -224,7 +238,7 @@ function generateStatsPieCharts(campaigns) {
         })
         var stats_chart = renderPieChart({
             elemId: status + '_chart',
-            title: status_label,
+            title: display_label,
             name: status,
             data: stats_data,
             colors: [statuses[status_label].color, "#dddddd"]
