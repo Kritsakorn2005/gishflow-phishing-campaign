@@ -86,6 +86,14 @@ const InterfaceSMS = "SMS"
 // API key or secret
 var ErrSMSCredentialsNotSpecified = errors.New("No SMS API key/secret specified")
 
+// InterfaceMessenger is the interface_type of a sending profile that delivers
+// via the Facebook Messenger Send API. The page access token is stored in the
+// profile's Password field.
+const InterfaceMessenger = "MESSENGER"
+
+// ErrMessengerTokenNotSpecified is thrown when a Messenger profile has no token
+var ErrMessengerTokenNotSpecified = errors.New("No Messenger page access token specified")
+
 // TableName specifies the database tablename for Gorm to use
 func (s SMTP) TableName() string {
 	return "smtp"
@@ -105,6 +113,13 @@ func (s *SMTP) Validate() error {
 	if s.Interface == InterfaceSMS {
 		if s.Username == "" || s.Password == "" {
 			return ErrSMSCredentialsNotSpecified
+		}
+		return nil
+	}
+	// A Messenger channel only needs a page access token (stored in Password).
+	if s.Interface == InterfaceMessenger {
+		if s.Password == "" {
+			return ErrMessengerTokenNotSpecified
 		}
 		return nil
 	}

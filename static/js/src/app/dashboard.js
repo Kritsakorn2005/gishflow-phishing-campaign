@@ -115,11 +115,13 @@ var statsMapping = {
 // campaign shows "LINE Sent" / "LINE Read" instead of the email wording.
 // Returns the label unchanged for Email / All so the statuses lookup still works.
 function channelLabel(label, channel) {
-    if (channel !== "LINE" && channel !== "SMS") return label
+    var names = { "LINE": "LINE", "SMS": "SMS", "MESSENGER": "Messenger" }
+    var ch = names[channel]
+    if (!ch) return label
     var map = {
-        "Email Sent": channel + " Sent",
-        "Email Opened": channel + " Read",
-        "Email Reported": channel + " Reported"
+        "Email Sent": ch + " Sent",
+        "Email Opened": ch + " Read",
+        "Email Reported": ch + " Reported"
     }
     return map[label] || label
 }
@@ -129,7 +131,8 @@ function channelLabel(label, channel) {
 function channelBadge(interfaceType) {
     var map = {
         "LINE": { label: "LINE", color: "#06C755" },
-        "SMS": { label: "SMS", color: "#FF9F0A" }
+        "SMS": { label: "SMS", color: "#FF9F0A" },
+        "MESSENGER": { label: "Messenger", color: "#0084FF" }
     }
     var c = map[interfaceType] || { label: "Email", color: "#0071E3" }
     return "<span style=\"display:inline-block;font-size:11px;font-weight:600;color:#fff;background:" +

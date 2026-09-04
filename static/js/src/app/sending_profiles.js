@@ -7,6 +7,7 @@ function toggleInterface() {
     $("#smtp_fields").toggle(v === "SMTP")
     $("#line_fields").toggle(v === "LINE")
     $("#sms_fields").toggle(v === "SMS")
+    $("#messenger_fields").toggle(v === "MESSENGER")
 }
 
 // Attempts to send a test email by POSTing to /campaigns/
@@ -80,6 +81,10 @@ function save(idx) {
         // ignore_cert_errors is reused as the SMS "mock mode" flag.
         profile.ignore_cert_errors = $("#sms_mock").prop("checked")
     }
+    // For a Messenger channel, the page access token is stored in the password.
+    if (profile.interface_type === "MESSENGER") {
+        profile.password = $("#messenger_token").val()
+    }
     if (idx != -1) {
         profile.id = profiles[idx].id
         api.SMTPId.put(profile)
@@ -119,6 +124,7 @@ function dismiss() {
     $("#sms_secret").val("")
     $("#sms_sender").val("")
     $("#sms_mock").prop("checked", true)
+    $("#messenger_token").val("")
     toggleInterface()
     $("#headersTable").dataTable().DataTable().clear().draw()
     $("#modal").modal('hide')
@@ -199,6 +205,7 @@ function edit(idx) {
             $("#sms_sender").val(profile.from_address)
             $("#sms_mock").prop("checked", profile.ignore_cert_errors)
         }
+        $("#messenger_token").val(profile.interface_type === "MESSENGER" ? profile.password : "")
     } else {
         $("#profileModalLabel").text("New Sending Profile")
     }
@@ -225,6 +232,7 @@ function copy(idx) {
         $("#sms_sender").val(profile.from_address)
         $("#sms_mock").prop("checked", profile.ignore_cert_errors)
     }
+    $("#messenger_token").val(profile.interface_type === "MESSENGER" ? profile.password : "")
     toggleInterface()
 }
 

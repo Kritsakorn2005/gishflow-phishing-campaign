@@ -647,12 +647,13 @@ var updateMap = function (results) {
 // instead of "Email Sent" / "Email Opened".
 function channelLabel(status) {
     if (!campaign.smtp) return status
-    var it = campaign.smtp.interface_type
-    if (it != "LINE" && it != "SMS") return status
+    var names = { "LINE": "LINE", "SMS": "SMS", "MESSENGER": "Messenger" }
+    var ch = names[campaign.smtp.interface_type]
+    if (!ch) return status
     var map = {
-        "Email Sent": it + " Sent",
-        "Email Opened": it + " Read",
-        "Email Reported": it + " Reported"
+        "Email Sent": ch + " Sent",
+        "Email Opened": ch + " Read",
+        "Email Reported": ch + " Reported"
     }
     return map[status] || status
 }
