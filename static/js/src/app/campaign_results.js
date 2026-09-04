@@ -645,6 +645,15 @@ var updateMap = function (results) {
 // channelLabel relabels the email-centric status text for the campaign's actual
 // delivery channel, so an SMS or LINE campaign reads "SMS Sent" / "LINE Read"
 // instead of "Email Sent" / "Email Opened".
+// quizCell renders a recipient's training-quiz result ("3 / 4"), or a dash when
+// they have not completed a quiz (or the training page had none).
+function quizCell(result) {
+    if (!result.quiz_total) {
+        return "<span class='text-muted'>&mdash;</span>"
+    }
+    return result.quiz_score + " / " + result.quiz_total
+}
+
 function channelLabel(status) {
     if (!campaign.smtp) return status
     var names = { "LINE": "LINE", "SMS": "SMS", "MESSENGER": "Messenger" }
@@ -745,7 +754,8 @@ function poll() {
                 var rid = rowData[0]
                 $.each(campaign.results, function (j, result) {
                     if (result.id == rid) {
-                        rowData[10] = moment(result.send_date).format('MMMM Do YYYY, h:mm:ss a')
+                        rowData[11] = moment(result.send_date).format('MMMM Do YYYY, h:mm:ss a')
+                        rowData[10] = quizCell(result)
                         rowData[7] = result.reported
                         rowData[6] = result.status
                         resultsTable.row(i).data(rowData)
@@ -816,7 +826,7 @@ function load() {
                         },
                         {
                             "render": function (data, type, row) {
-                                return createStatusLabel(data, row[10])
+                                return createStatusLabel(data, row[11])
                             },
                             "targets": [6]
                         },
@@ -853,6 +863,7 @@ function load() {
                         result.reported,
                         escapeHtml(result.line_id) || "",
                         escapeHtml(result.phone) || "",
+                        quizCell(result),
                         moment(result.send_date).format('MMMM Do YYYY, h:mm:ss a')
                     ])
                     email_series_data[result.status]++;
