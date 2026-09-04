@@ -123,6 +123,19 @@ var statusMapping = {
     "Email Reported": "reported",
 }
 
+// statusInfo safely looks up a status/event in the statuses map, returning a
+// neutral default for anything unrecognised. This keeps a new event type from
+// crashing the timeline rendering or the refresh/poll loop (which would leave
+// the Refresh button stuck on a spinner).
+function statusInfo(key) {
+    return statuses[key] || {
+        color: "#6c7a89",
+        label: "label-default",
+        icon: "fa-question",
+        point: "ct-point-error"
+    }
+}
+
 // This is an underwhelming attempt at an enum
 // until I have time to refactor this appropriately.
 var progressListing = [
@@ -404,8 +417,8 @@ function renderTimeline(data) {
             results += '<div class="timeline-entry">' +
                 '    <div class="timeline-bar"></div>'
             results +=
-                '    <div class="timeline-icon ' + statuses[event.message].label + '">' +
-                '    <i class="fa ' + statuses[event.message].icon + '"></i></div>' +
+                '    <div class="timeline-icon ' + statusInfo(event.message).label + '">' +
+                '    <i class="fa ' + statusInfo(event.message).icon + '"></i></div>' +
                 '    <div class="timeline-message">' + escapeHtml(event.message) +
                 '    <span class="timeline-date">' + moment.utc(event.time).local().format('MMMM Do YYYY h:mm:ss a') + '</span>'
             if (event.details) {
@@ -452,8 +465,8 @@ function renderTimeline(data) {
         results += '<div class="timeline-entry">' +
             '    <div class="timeline-bar"></div>'
         results +=
-            '    <div class="timeline-icon ' + statuses[record.status].label + '">' +
-            '    <i class="fa ' + statuses[record.status].icon + '"></i></div>' +
+            '    <div class="timeline-icon ' + statusInfo(record.status).label + '">' +
+            '    <i class="fa ' + statusInfo(record.status).icon + '"></i></div>' +
             '    <div class="timeline-message">' + "Scheduled to send at " + record.send_date + '</span>'
     }
     results += '</div></div>'
@@ -678,7 +691,7 @@ function poll() {
                     x: event_date.valueOf(),
                     y: 1,
                     marker: {
-                        fillColor: statuses[event.message].color
+                        fillColor: statusInfo(event.message).color
                     }
                 })
             })
@@ -884,7 +897,7 @@ function load() {
                         x: event_date.valueOf(),
                         y: 1,
                         marker: {
-                            fillColor: statuses[event.message].color
+                            fillColor: statusInfo(event.message).color
                         }
                     })
                 })
@@ -910,7 +923,7 @@ function load() {
                         title: channelLabel(status),
                         name: status,
                         data: email_data,
-                        colors: [statuses[status].color, '#dddddd']
+                        colors: [statusInfo(status).color, '#dddddd']
                     })
                 })
 
