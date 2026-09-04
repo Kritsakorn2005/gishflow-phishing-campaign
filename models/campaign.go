@@ -71,6 +71,7 @@ type CampaignStats struct {
 	ClickedLink   int64 `json:"clicked"`
 	SubmittedData int64 `json:"submitted_data"`
 	EmailReported int64 `json:"email_reported"`
+	QRScanned     int64 `json:"qr_scanned"`
 	Error         int64 `json:"error"`
 }
 
@@ -314,6 +315,12 @@ func getCampaignStats(cid int64) (CampaignStats, error) {
 	// Every opened email event implies the email was sent
 	s.EmailsSent += s.OpenedEmail
 	err = query.Where("status=?", Error).Count(&s.Error).Error
+	if err != nil {
+		return s, err
+	}
+	// GishFlow: QR scans are recorded as events (not a result status), so count
+	// them from the events table rather than the results table.
+	err = db.Table("events").Where("campaign_id = ? AND message = ?", cid, EventQRScanned).Count(&s.QRScanned).Error
 	return s, err
 }
 

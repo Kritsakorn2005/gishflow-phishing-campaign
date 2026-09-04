@@ -109,6 +109,7 @@ var statsMapping = {
     "email_reported": "Email Reported",
     "clicked": "Clicked Link",
     "submitted_data": "Submitted Data",
+    "qr_scanned": "QR Scanned",
 }
 
 // channelLabel adapts a stat label to the active channel filter, so a LINE
@@ -211,40 +212,38 @@ function renderPieChart(chartopts) {
 }
 
 function generateStatsPieCharts(campaigns) {
-    var stats_data = []
     var stats_series_data = {}
     var total = 0
 
+    // Seed every funnel donut at 0 so they all render even when the filtered
+    // list is empty (e.g. a channel that has no campaigns yet).
+    $.each(statsMapping, function (status) {
+        stats_series_data[status] = 0
+    })
     $.each(campaigns, function (i, campaign) {
         $.each(campaign.stats, function (status, count) {
             if (status == "total") {
                 total += count
                 return true
             }
-            if (!stats_series_data[status]) {
-                stats_series_data[status] = count;
-            } else {
-                stats_series_data[status] += count;
+            if (status in stats_series_data) {
+                stats_series_data[status] += count
             }
         })
     })
     $.each(stats_series_data, function (status, count) {
-        // I don't like this, but I guess it'll have to work.
         // Turns submitted_data into Submitted Data
-        if (!(status in statsMapping)) {
-            return true
-        }
-        status_label = statsMapping[status]
+        var status_label = statsMapping[status]
         var display_label = channelLabel(status_label, currentChannel)
-        stats_data.push({
+        var pct = total > 0 ? Math.floor((count / total) * 100) : 0
+        var stats_data = [{
             name: display_label,
-            y: Math.floor((count / total) * 100),
+            y: pct,
             count: count
-        })
-        stats_data.push({
+        }, {
             name: '',
-            y: 100 - Math.floor((count / total) * 100)
-        })
+            y: 100 - pct
+        }]
         var stats_chart = renderPieChart({
             elemId: status + '_chart',
             title: display_label,
@@ -253,8 +252,6 @@ function generateStatsPieCharts(campaigns) {
             colors: [statuses[status_label].color, "#dddddd"]
         })
         chartRegistry.push(stats_chart)
-
-        stats_data = []
     });
 }
 
