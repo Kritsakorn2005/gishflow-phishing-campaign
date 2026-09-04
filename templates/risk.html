@@ -1,6 +1,9 @@
 {{define "body"}}
 <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-    <h1 class="page-header">Risk</h1>
+    <h1 class="page-header">Risk
+        <button id="exportPdf" type="button" class="btn btn-default btn-sm pull-right" style="display:none;">
+            <i class="fa fa-file-pdf-o"></i> Export PDF</button>
+    </h1>
     <div id="flashes" class="row"></div>
     <div id="riskLoading">
         <i class="fa fa-spinner fa-spin fa-4x"></i>
@@ -32,6 +35,16 @@
                 <div class="gf-donut-wrap">
                     <div id="donut"></div>
                     <div class="gf-legend" id="legend"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel gf-card gf-trend-card">
+            <div class="panel-heading">Risk over time<span class="gf-sub">score per campaign</span></div>
+            <div class="panel-body">
+                <div id="trendChart" style="height:260px;"></div>
+                <div id="trendEmpty" class="text-muted" style="display:none;padding:24px 4px;">
+                    Need at least one campaign with results to plot a trend.
                 </div>
             </div>
         </div>

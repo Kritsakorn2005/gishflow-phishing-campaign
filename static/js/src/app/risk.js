@@ -42,6 +42,53 @@ function donut(low, med, high) {
         circles + "</svg>"
 }
 
+// renderTrend plots the per-campaign risk score over time. A falling line means
+// recipients are getting better at spotting the simulations.
+function renderTrend(points) {
+    if (!points || points.length === 0) {
+        $("#trendChart").hide()
+        $("#trendEmpty").show()
+        return
+    }
+    var data = points.map(function (p) {
+        return {
+            x: moment.utc(p.date).local().valueOf(),
+            y: p.score,
+            name: p.name,
+            campaign_id: p.campaign_id,
+            participants: p.participants
+        }
+    })
+    Highcharts.chart('trendChart', {
+        chart: { type: 'areaspline' },
+        title: { text: null },
+        credits: { enabled: false },
+        legend: { enabled: false },
+        xAxis: { type: 'datetime' },
+        yAxis: { min: 0, max: 100, title: { text: 'Risk score' } },
+        tooltip: {
+            formatter: function () {
+                return Highcharts.dateFormat('%b %d, %Y', this.x) + '<br>' + this.point.name +
+                    '<br>Risk: <b>' + this.y + '</b> (' + this.point.participants + ' people)'
+            }
+        },
+        plotOptions: {
+            series: {
+                marker: { enabled: true, radius: 4 },
+                cursor: 'pointer',
+                point: {
+                    events: {
+                        click: function () {
+                            window.location.href = '/campaigns/' + this.campaign_id
+                        }
+                    }
+                }
+            }
+        },
+        series: [{ data: data, color: '#0071e3', fillOpacity: 0.15 }]
+    })
+}
+
 function render(users, groups) {
     $("#riskLoading").hide()
     if (!users || users.length === 0) {
@@ -49,6 +96,7 @@ function render(users, groups) {
         return
     }
     $("#riskContent").show()
+    $("#exportPdf").show()
 
     var low = 0, med = 0, high = 0, sum = 0
     users.forEach(function (u) {
@@ -103,6 +151,9 @@ function render(users, groups) {
 }
 
 $(document).ready(function () {
+    $("#exportPdf").on("click", function () {
+        window.print()
+    })
     api.risk.users()
         .success(function (users) {
             api.risk.groups()
@@ -116,5 +167,17 @@ $(document).ready(function () {
         .error(function () {
             $("#riskLoading").hide()
             errorFlash("Error computing risk scores")
+        })
+    // Call the endpoint through the generic query() helper rather than adding a
+    // method to the shared api object in gophish.js: gophish.min.js is loaded
+    // once in base.html and cached hard by browsers, so a newly added api.risk
+    // method may not be picked up. query() already exists in that cached file.
+    query("/risk/trend", "GET", {}, false)
+        .success(function (points) {
+            renderTrend(points)
+        })
+        .error(function () {
+            $("#trendChart").hide()
+            $("#trendEmpty").show()
         })
 })

@@ -509,3 +509,18 @@ a:focus-visible,button:focus-visible,.btn:focus-visible,.form-control:focus-visi
 .gf-channel-filter{display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap}
 .gf-channel-filter .btn{border-radius:var(--gf-pill)}
 .gf-channel-filter .btn.active{background:var(--gf-accent)!important; border-color:var(--gf-accent)!important; color:#fff!important}
+
+/* ==========================================================================
+   Print / "Export PDF" — the browser's Save-as-PDF turns the Risk page into a
+   clean report: hide the chrome, force a light palette, avoid mid-panel breaks.
+   ========================================================================== */
+@media print {
+    .gf-topbar, .gf-corner, #exportPdf, #riskLoading, #flashes,
+    .gf-theme-toggle { display: none !important; }
+    body { background: #fff !important; padding-top: 0 !important; }
+    .main { max-width: none !important; width: 100% !important;
+            margin: 0 !important; padding: 0 12px !important; float: none !important; }
+    .panel, .gf-kpi, .gf-donut-card { break-inside: avoid; page-break-inside: avoid;
+            box-shadow: none !important; border: 1px solid #e5e5ea !important; }
+    a[href]:after { content: ""; } /* don't append URLs after links */
+}

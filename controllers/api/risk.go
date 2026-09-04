@@ -29,3 +29,14 @@ func (as *Server) RiskGroups(w http.ResponseWriter, r *http.Request) {
 	}
 	JSONResponse(w, scores, http.StatusOK)
 }
+
+// RiskTrend returns the per-campaign risk score over time for the user.
+func (as *Server) RiskTrend(w http.ResponseWriter, r *http.Request) {
+	points, err := models.GetRiskTrend(ctx.Get(r, "user_id").(int64))
+	if err != nil {
+		log.Error(err)
+		JSONResponse(w, models.Response{Success: false, Message: err.Error()}, http.StatusInternalServerError)
+		return
+	}
+	JSONResponse(w, points, http.StatusOK)
+}

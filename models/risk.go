@@ -3,6 +3,7 @@ package models
 import (
 	"math"
 	"sort"
+	"time"
 )
 
 // RiskScore represents a single recipient's aggregated susceptibility risk
@@ -40,6 +41,32 @@ const (
 	riskTrained        = -10
 	riskMaxPerCampaign = 40
 )
+
+// resultContribution returns a single result's risk contribution: the weight of
+// the worst action the recipient took, mitigated by reporting and training, and
+// floored at zero. Shared by the aggregate and trend calculations.
+func resultContribution(r Result) int {
+	base := 0
+	switch r.Status {
+	case EventDataSubmit:
+		base = riskSubmit
+	case EventClicked:
+		base = riskClick
+	case EventOpened:
+		base = riskOpen
+	}
+	c := base
+	if r.Reported {
+		c += riskReport
+	}
+	if r.Trained {
+		c += riskTrained
+	}
+	if c < 0 {
+		c = 0
+	}
+	return c
+}
 
 // riskLevel maps a 0-100 score to a Low / Medium / High band.
 func riskLevel(score int) string {
@@ -132,6 +159,65 @@ func GetUserRiskScores(uid int64) ([]RiskScore, error) {
 	}
 	sort.Slice(scores, func(i, j int) bool { return scores[i].Score > scores[j].Score })
 	return scores, nil
+}
+
+// RiskTrendPoint is one campaign's risk score, used to plot how susceptibility
+// changes over time (a falling line means awareness is improving).
+type RiskTrendPoint struct {
+	CampaignId   int64     `json:"campaign_id"`
+	Name         string    `json:"name"`
+	Date         time.Time `json:"date"`
+	Score        int       `json:"score"`
+	Participants int       `json:"participants"`
+}
+
+// GetRiskTrend computes a risk score per campaign (same weighting as the
+// aggregate score, scoped to that campaign's results) and returns the points in
+// chronological order. Campaigns with no results are omitted.
+func GetRiskTrend(uid int64) ([]RiskTrendPoint, error) {
+	campaigns := []Campaign{}
+	if err := db.Where("user_id=?", uid).Find(&campaigns).Error; err != nil {
+		return nil, err
+	}
+	results := []Result{}
+	if err := db.Where("user_id=?", uid).Find(&results).Error; err != nil {
+		return nil, err
+	}
+	type agg struct{ sum, n int }
+	byCampaign := map[int64]*agg{}
+	for _, r := range results {
+		a, ok := byCampaign[r.CampaignId]
+		if !ok {
+			a = &agg{}
+			byCampaign[r.CampaignId] = a
+		}
+		a.sum += resultContribution(r)
+		a.n++
+	}
+	points := make([]RiskTrendPoint, 0, len(campaigns))
+	for _, c := range campaigns {
+		a, ok := byCampaign[c.Id]
+		if !ok || a.n == 0 {
+			continue
+		}
+		avg := float64(a.sum) / float64(a.n)
+		score := int(math.Round(avg / float64(riskMaxPerCampaign) * 100))
+		if score > 100 {
+			score = 100
+		}
+		if score < 0 {
+			score = 0
+		}
+		points = append(points, RiskTrendPoint{
+			CampaignId:   c.Id,
+			Name:         c.Name,
+			Date:         c.CreatedDate,
+			Score:        score,
+			Participants: a.n,
+		})
+	}
+	sort.Slice(points, func(i, j int) bool { return points[i].Date.Before(points[j].Date) })
+	return points, nil
 }
 
 // GetGroupRiskScores rolls per-recipient risk up into a score per group. A
