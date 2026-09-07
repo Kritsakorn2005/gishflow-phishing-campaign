@@ -13,6 +13,12 @@
     <!-- GishFlow theme init (set before paint to avoid flash) + toggle -->
     <script>
     (function(){ try{ var t=localStorage.getItem('gf-theme'); if(t){ document.documentElement.setAttribute('data-theme',t); } }catch(e){} })();
+    (function(){ try{ if(localStorage.getItem('gf-nav')==='pinned'){ document.documentElement.setAttribute('data-nav','pinned'); } }catch(e){} })();
+    function gfTogglePin(){
+        var el=document.documentElement, pinned=el.getAttribute('data-nav')==='pinned';
+        if(pinned){ el.removeAttribute('data-nav'); try{ localStorage.removeItem('gf-nav'); }catch(e){} }
+        else{ el.setAttribute('data-nav','pinned'); try{ localStorage.setItem('gf-nav','pinned'); }catch(e){} }
+    }
     function gfToggleTheme(){
         var el=document.documentElement, cur=el.getAttribute('data-theme');
         if(!cur){ cur=(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light'; }
@@ -51,31 +57,22 @@
 </head>
 
 <body>
-    <div class="navbar navbar-inverse navbar-fixed-top gf-topbar" role="navigation">
-        <div class="container-fluid">
-            <div class="navbar-header">
-                <a class="navbar-brand" href="/">GishFlow</a>
-            </div>
-            {{if .User}}{{template "nav" .}}{{end}}
-            <div class="gf-topbar-right">
-                {{if .User}}
-                <div class="btn-group" id="navbar-dropdown">
-                    <a class="btn btn-default btn-sm" href="/settings"><i class="fa fa-user"></i> {{.User.Username}}</a>
-                    <a class="btn btn-default btn-sm" href="/logout" title="Log out">
-                        <i class="fa fa-sign-out"></i>
-                    </a>
-                </div>
-                {{else}}
-                <a href="/login">
-                    <button type="button" class="btn btn-primary btn-sm">Login</button>
-                </a>
-                {{end}}
-            </div>
+    <!-- Left hover-reveal navigation drawer (relocated from the top bar). Hover
+         the thin hot-zone on the left edge to slide it out, or pin it open with
+         the tack button. -->
+    <div class="gf-hotzone" aria-hidden="true"></div>
+    <aside class="gf-sidebar" role="navigation">
+        <div class="gf-sidebar-head">
+            <a class="gf-sidebar-brand" href="/">GishFlow</a>
+            {{if .User}}
+            <button type="button" class="gf-pin" onclick="gfTogglePin()" title="ปักหมุดเมนู / Pin menu" aria-label="Pin menu">
+                <i class="fa fa-thumb-tack"></i>
+            </button>
+            {{end}}
         </div>
-    </div>
-    {{if .User}}
-    <div class="gf-corner">
-        <ul class="nav nav-sidebar gf-cornernav">
+        {{if .User}}
+        {{template "nav" .}}
+        <ul class="nav nav-sidebar gf-topnav gf-subnav">
             <li><a href="/qr"><i class="fa fa-qrcode"></i> QR Generator</a></li>
             <li><a href="/settings"><i class="fa fa-cog"></i> Settings</a></li>
             {{if .ModifySystem}}
@@ -83,16 +80,24 @@
             <li><a href="/webhooks"><i class="fa fa-plug"></i> Webhooks</a></li>
             {{end}}
         </ul>
-        <div class="gf-corner-toggles">
-            <button type="button" class="gf-theme-toggle" onclick="gfToggleTheme()" title="สลับธีมสว่าง / มืด" aria-label="Toggle theme">
-                <i id="gf-theme-ico" class="fa fa-moon-o"></i>
-            </button>
-            <button type="button" class="gf-theme-toggle gf-lang-toggle" onclick="gfToggleLang()" title="EN / ไทย" aria-label="Toggle language">
-                <span id="gf-lang-ico">ไทย</span>
-            </button>
+        <div class="gf-sidebar-foot">
+            <div class="btn-group gf-userbtns" id="navbar-dropdown">
+                <a class="btn btn-default btn-sm" href="/settings"><i class="fa fa-user"></i> {{.User.Username}}</a>
+                <a class="btn btn-default btn-sm" href="/logout" title="Log out"><i class="fa fa-sign-out"></i></a>
+            </div>
+            <div class="gf-corner-toggles">
+                <button type="button" class="gf-theme-toggle" onclick="gfToggleTheme()" title="สลับธีมสว่าง / มืด" aria-label="Toggle theme">
+                    <i id="gf-theme-ico" class="fa fa-moon-o"></i>
+                </button>
+                <button type="button" class="gf-theme-toggle gf-lang-toggle" onclick="gfToggleLang()" title="EN / ไทย" aria-label="Toggle language">
+                    <span id="gf-lang-ico">ไทย</span>
+                </button>
+            </div>
         </div>
-    </div>
-    {{end}}
+        {{else}}
+        <a href="/login"><button type="button" class="btn btn-primary btn-sm">Login</button></a>
+        {{end}}
+    </aside>
     {{template "body" .}}
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="/js/dist/vendor.min.js"></script>

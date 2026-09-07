@@ -368,42 +368,58 @@ a:focus-visible,button:focus-visible,.btn:focus-visible,.form-control:focus-visi
 #reported_chart .ct-series-a .ct-slice-donut{stroke:var(--gf-green)!important}
 
 /* ==========================================================================
-   Top navigation layout — nav moved from left sidebar to a centered top bar
-   (Apple.com-style). Structure kept as .nav-sidebar so gophish's active-nav
-   JS still works; this restyles it horizontal and relocates it.
+   Left navigation drawer — nav relocated from the top bar to a hover-reveal
+   drawer on the left. Hover the thin hot-zone (or the drawer) to slide it out,
+   or pin it open with the tack button (persisted via data-nav on <html>).
+   Structure kept as .nav-sidebar so gophish's active-nav JS still works.
    ========================================================================== */
-.gf-topbar{min-height:56px; padding:0}
-.gf-topbar>.container-fluid{display:flex; align-items:center; gap:18px; max-width:1300px; margin:0 auto; padding:8px 24px; min-height:56px}
-.gf-topbar .navbar-header{float:none; margin:0; display:flex; align-items:center}
-.gf-topbar .navbar-brand{float:none; height:auto; line-height:1; padding:0; display:inline-flex; align-items:center; gap:9px}
+.gf-hotzone{position:fixed; left:0; top:0; width:16px; height:100vh; z-index:1020}
+.gf-hotzone::after{content:""; position:absolute; left:0; top:50%; transform:translateY(-50%);
+  width:4px; height:52px; border-radius:0 4px 4px 0; background:var(--gf-hairline-2); opacity:.7}
+.gf-sidebar{
+  position:fixed; left:0; top:0; height:100vh; width:236px; z-index:1030;
+  display:flex; flex-direction:column; gap:4px; padding:16px 12px;
+  background:var(--gf-surface); border-right:1px solid var(--gf-hairline); box-shadow:var(--gf-shadow-lg);
+  transform:translateX(-100%); transition:transform .22s cubic-bezier(.4,0,.2,1); overflow-y:auto;
+}
+.gf-hotzone:hover ~ .gf-sidebar,.gf-sidebar:hover{transform:translateX(0)}
+:root[data-nav="pinned"] .gf-sidebar{transform:translateX(0)}
+:root[data-nav="pinned"] .gf-hotzone{display:none}
 
-/* Centered horizontal nav */
-.gf-topnav-wrap{flex:1 1 auto; display:flex; justify-content:center; min-width:0; overflow-x:auto; -webkit-overflow-scrolling:touch}
-.gf-topnav-wrap::-webkit-scrollbar{height:0}
-.gf-topnav{display:flex; gap:2px; margin:0; padding:0; float:none; white-space:nowrap; list-style:none}
+.gf-sidebar-head{display:flex; align-items:center; justify-content:space-between; padding:2px 6px 10px}
+.gf-sidebar-brand{font-weight:700; font-size:18px; color:var(--gf-text); text-decoration:none; letter-spacing:-.02em}
+.gf-pin{border:0; background:transparent; color:var(--gf-text-3); cursor:pointer; font-size:13px; padding:7px; border-radius:7px; line-height:1; transition:transform .15s,color .15s,background .15s}
+.gf-pin:hover{background:var(--gf-surface-2); color:var(--gf-text)}
+:root[data-nav="pinned"] .gf-pin{color:var(--gf-accent); transform:rotate(-30deg)}
+
+/* Vertical nav (both the primary links and the secondary admin group) */
+.gf-topnav-wrap{display:block; flex:none; min-width:0; overflow:visible}
+.gf-topnav{display:flex; flex-direction:column; gap:2px; margin:0; padding:0; float:none; list-style:none}
 .gf-topnav>li{float:none; display:block; margin:0}
 .gf-topnav>li>a{
-  display:block; padding:7px 14px; margin:0; border-radius:var(--gf-pill); background:transparent;
-  font-size:13.5px; font-weight:500; color:var(--gf-text-2); letter-spacing:-.01em; transition:background .15s,color .15s;
+  display:flex; align-items:center; gap:10px; padding:9px 12px; margin:0; border-radius:var(--gf-r-sm); background:transparent;
+  font-size:14px; font-weight:500; color:var(--gf-text-2); letter-spacing:-.01em; white-space:nowrap; transition:background .15s,color .15s;
 }
 .gf-topnav>li>a:hover,.gf-topnav>li>a:focus{background:var(--gf-surface-2); color:var(--gf-text)}
-.gf-topnav>li.active>a,.gf-topnav>li.active>a:hover,.gf-topnav>li.active>a:focus{
-  background:var(--gf-accent-soft); color:var(--gf-accent); font-weight:600;
-}
-.gf-topbar-right{flex:none; display:flex; align-items:center; gap:6px}
-.gf-topbar-right .btn{border-radius:var(--gf-pill)}
+.gf-topnav>li.active>a,.gf-topnav>li.active>a:hover,.gf-topnav>li.active>a:focus{background:var(--gf-accent-soft); color:var(--gf-accent); font-weight:600}
+.gf-topnav>li>a .fa{width:16px; text-align:center; opacity:.85}
+.gf-subnav{margin-top:8px; padding-top:8px; border-top:1px solid var(--gf-hairline)}
 
-/* Content: full width + centered, sidebar removed */
+.gf-sidebar-foot{margin-top:auto; padding-top:12px; border-top:1px solid var(--gf-hairline); display:flex; flex-direction:column; gap:10px}
+.gf-userbtns{display:flex}
+.gf-userbtns .btn{border-radius:var(--gf-pill)}
+
+/* Content: full width; sidebar removed. Shifts right only when the nav is pinned. */
 .sidebar{display:none!important}
 .main{
   width:auto!important; max-width:1180px!important; margin:0 auto!important; float:none!important;
-  padding:92px 24px 72px!important;
+  padding:32px 30px 72px!important;
 }
+:root[data-nav="pinned"] .main{margin-left:236px!important; margin-right:24px!important}
 
 @media (max-width:860px){
-  .gf-topbar>.container-fluid{gap:10px; padding:8px 14px}
-  .gf-topnav-wrap{justify-content:flex-start}
   .main{padding-left:16px!important; padding-right:16px!important}
+  :root[data-nav="pinned"] .main{margin-left:auto!important}
 }
 
 /* ==========================================================================
@@ -518,10 +534,10 @@ a:focus-visible,button:focus-visible,.btn:focus-visible,.form-control:focus-visi
    clean report: hide the chrome, force a light palette, avoid mid-panel breaks.
    ========================================================================== */
 @media print {
-    .gf-topbar, .gf-corner, #exportPdf, #riskLoading, #flashes,
+    .gf-sidebar, .gf-hotzone, #exportPdf, #riskLoading, #flashes,
     .gf-theme-toggle { display: none !important; }
     body { background: #fff !important; padding-top: 0 !important; }
-    .main { max-width: none !important; width: 100% !important;
+    .main, :root[data-nav="pinned"] .main { max-width: none !important; width: 100% !important;
             margin: 0 !important; padding: 0 12px !important; float: none !important; }
     .panel, .gf-kpi, .gf-donut-card { break-inside: avoid; page-break-inside: avoid;
             box-shadow: none !important; border: 1px solid #e5e5ea !important; }
