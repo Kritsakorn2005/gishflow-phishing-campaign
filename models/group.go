@@ -57,8 +57,8 @@ type BaseRecipient struct {
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
 	Position  string `json:"position"`
-	LineID string `json:"line_id" gorm:"column:line_id"`
-	Phone  string `json:"phone" gorm:"column:phone"`
+	LineID    string `json:"line_id" gorm:"column:line_id"`
+	Phone     string `json:"phone" gorm:"column:phone"`
 }
 
 // FormatAddress returns the email address to use in the "To" header of the email
