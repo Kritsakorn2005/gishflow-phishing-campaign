@@ -53,7 +53,6 @@
                             <option value="SMTP">SMTP (Email)</option>
                             <option value="LINE">LINE (Messaging API)</option>
                             <option value="SMS">SMS (ThaiBulkSMS)</option>
-                            <option value="MESSENGER">Messenger (Facebook)</option>
                         </select>
                     </div>
                     <div id="smtp_fields">
@@ -121,13 +120,6 @@
                                 <input id="sms_mock" type="checkbox" checked>
                                 <label for="sms_mock">Mock mode &mdash; log only, don't actually send (no ThaiBulkSMS credits used). Turn off to send for real.</label>
                             </div>
-                        </div>
-                    </div>
-                    <div id="messenger_fields" style="display:none;">
-                        <div class="form-group">
-                            <label class="control-label" for="messenger_token">Page Access Token:</label>
-                            <input type="password" class="form-control" id="messenger_token" placeholder="Facebook Page access token" autocomplete="new-password" />
-                            <p class="help-block">From Meta for Developers &rarr; your app &rarr; Messenger &rarr; your Page. Recipients must have messaged your Page within the last 24 hours to receive a message.</p>
                         </div>
                     </div>
                 </form>

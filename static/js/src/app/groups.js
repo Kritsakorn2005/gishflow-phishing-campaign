@@ -10,8 +10,7 @@ function save(id) {
             email: unescapeHtml(target[2]),
             position: unescapeHtml(target[3]),
             line_id: unescapeHtml(target[4]),
-            phone: unescapeHtml(target[5]),
-            messenger_id: unescapeHtml(target[6])
+            phone: unescapeHtml(target[5])
         })
     })
     var group = {
@@ -83,7 +82,6 @@ function edit(id) {
                       escapeHtml(record.position),
                       escapeHtml(record.line_id || ''),
                       escapeHtml(record.phone || ''),
-                      escapeHtml(record.messenger_id || ''),
                       '<span style="cursor:pointer;"><i class="fa fa-trash-o"></i></span>'
                   ])
                 });
@@ -118,8 +116,7 @@ function edit(id) {
                     record.email,
                     record.position,
                     record.line_id,
-                    record.phone,
-                    record.messenger_id);
+                    record.phone);
             });
             targets.DataTable().draw();
         }
@@ -194,7 +191,7 @@ var deleteGroup = function (id) {
     })
 }
 
-function addTarget(firstNameInput, lastNameInput, emailInput, positionInput, lineIdInput, phoneInput, messengerIdInput) {
+function addTarget(firstNameInput, lastNameInput, emailInput, positionInput, lineIdInput, phoneInput) {
     // Create new data row.
     var email = escapeHtml(emailInput).toLowerCase();
     var newRow = [
@@ -204,7 +201,6 @@ function addTarget(firstNameInput, lastNameInput, emailInput, positionInput, lin
         escapeHtml(positionInput),
         escapeHtml(lineIdInput || ''),
         escapeHtml(phoneInput || ''),
-        escapeHtml(messengerIdInput || ''),
         '<span style="cursor:pointer;"><i class="fa fa-trash-o"></i></span>'
     ];
 
@@ -288,8 +284,7 @@ $(document).ready(function () {
             $("#email").val(),
             $("#position").val(),
             $("#lineId").val(),
-            $("#phone").val(),
-            $("#messengerId").val());
+            $("#phone").val());
         targets.DataTable().draw();
 
         // Reset user input.

@@ -656,7 +656,7 @@ function quizCell(result) {
 
 function channelLabel(status) {
     if (!campaign.smtp) return status
-    var names = { "LINE": "LINE", "SMS": "SMS", "MESSENGER": "Messenger" }
+    var names = { "LINE": "LINE", "SMS": "SMS" }
     var ch = names[campaign.smtp.interface_type]
     if (!ch) return status
     var map = {

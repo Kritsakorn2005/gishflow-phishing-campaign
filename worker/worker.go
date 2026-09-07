@@ -107,13 +107,6 @@ func (w *DefaultWorker) processCampaigns(t time.Time) error {
 				w.sendViaSMS(c, msc)
 				return
 			}
-			if c.SMTP.Interface == models.InterfaceMessenger {
-				log.WithFields(logrus.Fields{
-					"num_messages": len(msc),
-				}).Info("Sending Messenger messages")
-				w.sendViaMessenger(c, msc)
-				return
-			}
 			log.WithFields(logrus.Fields{
 				"num_emails": len(msc),
 			}).Info("Sending emails to mailer for processing")
@@ -175,10 +168,6 @@ func (w *DefaultWorker) LaunchCampaign(c models.Campaign) {
 	}
 	if campaignMailCtx.SMTP.Interface == models.InterfaceSMS {
 		w.sendViaSMS(campaignMailCtx, mailEntries)
-		return
-	}
-	if campaignMailCtx.SMTP.Interface == models.InterfaceMessenger {
-		w.sendViaMessenger(campaignMailCtx, mailEntries)
 		return
 	}
 	w.mailer.Queue(mailEntries)
@@ -256,39 +245,6 @@ func (w *DefaultWorker) sendViaSMS(c models.Campaign, msc []mailer.Mail) {
 			continue
 		}
 		if err := models.SendThaiBulkSMS(apiKey, apiSecret, sender, to, text); err != nil {
-			log.Error(err)
-			m.Error(err)
-			continue
-		}
-		if err := m.Success(); err != nil {
-			log.Error(err)
-		}
-	}
-}
-
-// sendViaMessenger delivers a batch of maillogs through the Facebook Messenger
-// Send API. It renders each recipient's message and sends it to their PSID,
-// reusing the existing result/maillog bookkeeping (Success/Error) so tracking,
-// teachable moments and risk scoring all work exactly as they do for email.
-func (w *DefaultWorker) sendViaMessenger(c models.Campaign, msc []mailer.Mail) {
-	token := c.SMTP.Password
-	for _, entry := range msc {
-		m, ok := entry.(*models.MailLog)
-		if !ok {
-			entry.Error(fmt.Errorf("unexpected mail type for Messenger channel"))
-			continue
-		}
-		to, text, err := m.GenerateMessenger()
-		if err != nil {
-			log.Error(err)
-			m.Error(err)
-			continue
-		}
-		if to == "" {
-			m.Error(fmt.Errorf("recipient has no Messenger ID"))
-			continue
-		}
-		if err := models.SendMessengerMessage(token, to, text); err != nil {
 			log.Error(err)
 			m.Error(err)
 			continue

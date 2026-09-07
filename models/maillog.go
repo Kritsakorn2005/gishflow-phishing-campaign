@@ -219,33 +219,6 @@ func (m *MailLog) GenerateSMS() (string, string, error) {
 	return r.Phone, text, nil
 }
 
-// GenerateMessenger renders the Messenger message for this maillog's recipient,
-// returning the recipient's page-scoped ID (PSID) and the rendered template
-// text. Used by the worker for Messenger channel campaigns.
-func (m *MailLog) GenerateMessenger() (string, string, error) {
-	r, err := GetResult(m.RId)
-	if err != nil {
-		return "", "", err
-	}
-	c := m.cachedCampaign
-	if c == nil {
-		campaign, err := GetCampaignMailContext(m.CampaignId, m.UserId)
-		if err != nil {
-			return "", "", err
-		}
-		c = &campaign
-	}
-	ptx, err := NewPhishingTemplateContext(c, r.BaseRecipient, r.RId)
-	if err != nil {
-		return "", "", err
-	}
-	text, err := ExecuteTemplate(c.Template.Text, ptx)
-	if err != nil {
-		return "", "", err
-	}
-	return r.MessengerID, text, nil
-}
-
 // Generate fills in the details of a gomail.Message instance with
 // the correct headers and body from the campaign and recipient listed in
 // the maillog. We accept the gomail.Message as an argument so that the caller
