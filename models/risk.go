@@ -42,6 +42,21 @@ const (
 	riskMaxPerCampaign = 40
 )
 
+// riskHalfLifeDays is how long it takes an isolated risky action to lose half of
+// its weight in the current risk score. Recent behaviour therefore dominates,
+// and — absent any new failures — a recipient's risk decays over time.
+const riskHalfLifeDays = 30.0
+
+// recencyWeight returns a 0..1 multiplier that halves every riskHalfLifeDays of
+// age, so older results contribute less to the current risk score.
+func recencyWeight(t, now time.Time) float64 {
+	ageDays := now.Sub(t).Hours() / 24.0
+	if ageDays < 0 {
+		ageDays = 0
+	}
+	return math.Pow(0.5, ageDays/riskHalfLifeDays)
+}
+
 // resultContribution returns a single result's risk contribution: the weight of
 // the worst action the recipient took, mitigated by reporting and training, and
 // floored at zero. Shared by the aggregate and trend calculations.
@@ -82,20 +97,22 @@ func riskLevel(score int) string {
 
 type riskAgg struct {
 	rs  RiskScore
-	sum int
+	sum float64
 	n   int
 }
 
 // GetUserRiskScores computes a 0-100 risk score for every recipient that has
-// participated in one of the user's campaigns. The score is the average of
-// each campaign's contribution (worst action, mitigated by reporting/training),
-// normalized against the maximum possible per-campaign contribution.
+// participated in one of the user's campaigns. Each campaign's contribution
+// (worst action, mitigated by reporting/training) is weighted by recency so
+// older behaviour fades, then averaged and normalized against the maximum
+// possible per-campaign contribution.
 func GetUserRiskScores(uid int64) ([]RiskScore, error) {
 	results := []Result{}
 	err := db.Where("user_id=?", uid).Find(&results).Error
 	if err != nil {
 		return nil, err
 	}
+	now := time.Now().UTC()
 	byEmail := map[string]*riskAgg{}
 	for _, r := range results {
 		a, ok := byEmail[r.Email]
@@ -108,16 +125,13 @@ func GetUserRiskScores(uid int64) ([]RiskScore, error) {
 		a.rs.LastName = r.LastName
 		a.rs.Position = r.Position
 
-		base := 0
+		// Raw (undecayed) tallies for the informational columns.
 		switch r.Status {
 		case EventDataSubmit:
-			base = riskSubmit
 			a.rs.Submitted++
 		case EventClicked:
-			base = riskClick
 			a.rs.Clicked++
 		case EventOpened:
-			base = riskOpen
 			a.rs.Opened++
 		}
 		if r.Reported {
@@ -126,17 +140,9 @@ func GetUserRiskScores(uid int64) ([]RiskScore, error) {
 		if r.Trained {
 			a.rs.Trained++
 		}
-		contribution := base
-		if r.Reported {
-			contribution += riskReport
-		}
-		if r.Trained {
-			contribution += riskTrained
-		}
-		if contribution < 0 {
-			contribution = 0
-		}
-		a.sum += contribution
+		// The score itself decays: an old action counts for less than a recent
+		// one, so a recipient's risk falls over time if they stop failing.
+		a.sum += float64(resultContribution(r)) * recencyWeight(r.ModifiedDate, now)
 		a.n++
 		a.rs.Campaigns = a.n
 	}
@@ -144,7 +150,7 @@ func GetUserRiskScores(uid int64) ([]RiskScore, error) {
 	for _, a := range byEmail {
 		avg := 0.0
 		if a.n > 0 {
-			avg = float64(a.sum) / float64(a.n)
+			avg = a.sum / float64(a.n)
 		}
 		score := int(math.Round(avg / float64(riskMaxPerCampaign) * 100))
 		if score > 100 {
