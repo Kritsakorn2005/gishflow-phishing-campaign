@@ -3,9 +3,11 @@ package controllers
 import (
 	"compress/gzip"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"html"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"strconv"
@@ -114,6 +116,8 @@ func (ps *PhishingServer) registerRoutes() {
 	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", fileServer))
 	router.HandleFunc("/track", ps.TrackHandler)
 	router.HandleFunc("/robots.txt", ps.RobotsHandler)
+	// GishFlow: LINE OA webhook — collects recipients' userIds automatically.
+	router.HandleFunc("/line/webhook", ps.LineWebhookHandler)
 	router.HandleFunc("/{path:.*}/track", ps.TrackHandler)
 	router.HandleFunc("/{path:.*}/report", ps.ReportHandler)
 	router.HandleFunc("/report", ps.ReportHandler)
@@ -357,6 +361,46 @@ func renderPhishResponse(w http.ResponseWriter, r *http.Request, ptx models.Phis
 // RobotsHandler prevents search engines, etc. from indexing phishing materials
 func (ps *PhishingServer) RobotsHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "User-agent: *\nDisallow: /")
+}
+
+// lineWebhookBody is the subset of the LINE webhook payload we care about: the
+// list of events, each carrying the source userId of whoever interacted.
+type lineWebhookBody struct {
+	Events []struct {
+		Type   string `json:"type"`
+		Source struct {
+			Type   string `json:"type"`
+			UserID string `json:"userId"`
+		} `json:"source"`
+	} `json:"events"`
+}
+
+// LineWebhookHandler receives events from a LINE Official Account (follow,
+// message, etc.) and records the sender's userId as a LineContact, so
+// recipients can be collected automatically instead of looked up by hand.
+// It always answers 200 so LINE considers the webhook healthy.
+func (ps *PhishingServer) LineWebhookHandler(w http.ResponseWriter, r *http.Request) {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Error(err)
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+	var wb lineWebhookBody
+	if err := json.Unmarshal(body, &wb); err != nil {
+		log.Error(err)
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+	for _, e := range wb.Events {
+		if e.Source.UserID == "" {
+			continue
+		}
+		if err := models.SaveLineContact(e.Source.UserID, ""); err != nil {
+			log.Error(err)
+		}
+	}
+	w.WriteHeader(http.StatusOK)
 }
 
 // quizStyle is the shared, self-contained styling for the quiz form and the

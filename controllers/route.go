@@ -135,6 +135,7 @@ func (as *AdminServer) registerRoutes() {
 	router.HandleFunc("/training_pages", mid.Use(as.TrainingPages, mid.RequireLogin))
 	router.HandleFunc("/risk", mid.Use(as.Risk, mid.RequireLogin))
 	router.HandleFunc("/qr", mid.Use(as.QRGenerator, mid.RequireLogin))
+	router.HandleFunc("/line_contacts", mid.Use(as.LineContacts, mid.RequireLogin))
 	router.HandleFunc("/sending_profiles", mid.Use(as.SendingProfiles, mid.RequireLogin))
 	router.HandleFunc("/settings", mid.Use(as.Settings, mid.RequireLogin))
 	router.HandleFunc("/users", mid.Use(as.UserManagement, mid.RequirePermission(models.PermissionModifySystem), mid.RequireLogin))
@@ -260,6 +261,13 @@ func (as *AdminServer) QRGenerator(w http.ResponseWriter, r *http.Request) {
 	params := newTemplateParams(r)
 	params.Title = "QR Generator"
 	getTemplate(w, "qr").ExecuteTemplate(w, "base", params)
+}
+
+// LineContacts renders the LINE contacts collected from the OA webhook
+func (as *AdminServer) LineContacts(w http.ResponseWriter, r *http.Request) {
+	params := newTemplateParams(r)
+	params.Title = "LINE Contacts"
+	getTemplate(w, "line_contacts").ExecuteTemplate(w, "base", params)
 }
 
 // SendingProfiles handles the default path and template execution

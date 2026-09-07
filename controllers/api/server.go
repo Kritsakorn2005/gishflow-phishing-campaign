@@ -80,6 +80,8 @@ func (as *Server) registerRoutes() {
 	router.HandleFunc("/risk/users", as.RiskUsers)
 	router.HandleFunc("/risk/groups", as.RiskGroups)
 	router.HandleFunc("/risk/trend", as.RiskTrend)
+	router.HandleFunc("/line_contacts", as.LineContacts)
+	router.HandleFunc("/line_contacts/{id:[0-9]+}", as.LineContact)
 	router.HandleFunc("/qr", as.QRCode)
 	router.HandleFunc("/smtp/", as.SendingProfiles)
 	router.HandleFunc("/smtp/{id:[0-9]+}", as.SendingProfile)

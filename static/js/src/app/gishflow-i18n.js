@@ -20,6 +20,7 @@
         "Sending Profiles": "โปรไฟล์การส่ง",
         // Corner menu
         "QR Generator": "เครื่องสร้าง QR",
+        "LINE Contacts": "รายชื่อ LINE",
         "Settings": "ตั้งค่า",
         "Users": "ผู้ใช้",
         "Webhooks": "เว็บฮุก",
