@@ -456,6 +456,9 @@ a:focus-visible,button:focus-visible,.btn:focus-visible,.form-control:focus-visi
 }
 .gf-theme-toggle:hover{background:var(--gf-surface-2); color:var(--gf-accent)}
 .gf-theme-toggle:active{transform:scale(.94)}
+/* language toggle reuses the round button but shows a short text label */
+.gf-lang-toggle{font-size:13px; font-weight:700; letter-spacing:.02em}
+.gf-corner-toggles{display:flex; gap:8px}
 @media (max-width:860px){ .gf-corner{left:12px; bottom:12px} }
 
 /* ==========================================================================

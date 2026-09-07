@@ -83,15 +83,22 @@
             <li><a href="/webhooks"><i class="fa fa-plug"></i> Webhooks</a></li>
             {{end}}
         </ul>
-        <button type="button" class="gf-theme-toggle" onclick="gfToggleTheme()" title="สลับธีมสว่าง / มืด" aria-label="Toggle theme">
-            <i id="gf-theme-ico" class="fa fa-moon-o"></i>
-        </button>
+        <div class="gf-corner-toggles">
+            <button type="button" class="gf-theme-toggle" onclick="gfToggleTheme()" title="สลับธีมสว่าง / มืด" aria-label="Toggle theme">
+                <i id="gf-theme-ico" class="fa fa-moon-o"></i>
+            </button>
+            <button type="button" class="gf-theme-toggle gf-lang-toggle" onclick="gfToggleLang()" title="EN / ไทย" aria-label="Toggle language">
+                <span id="gf-lang-ico">ไทย</span>
+            </button>
+        </div>
     </div>
     {{end}}
     {{template "body" .}}
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="/js/dist/vendor.min.js"></script>
     <script src="/js/dist/app/gophish.min.js"></script>
+    <!-- GishFlow EN/TH UI translation (served directly, no build step) -->
+    <script src="/js/src/app/gishflow-i18n.js"></script>
     {{template "scripts" .}}
 </body>
 
