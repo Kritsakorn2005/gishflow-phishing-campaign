@@ -121,6 +121,23 @@
                     </tbody>
                 </table>
                 <hr>
+                <div class="gf-phishscale">
+                    <label class="control-label">NIST Phish Scale
+                        <small class="text-muted">&mdash; how hard is this message to detect?</small></label>
+                    <div class="gf-ps-controls">
+                        <label for="ps_premise" class="gf-ps-plabel">Premise alignment (how well it fits the target's context):</label>
+                        <select id="ps_premise" class="form-control">
+                            <option value="1">1 &mdash; Not aligned at all</option>
+                            <option value="2">2 &mdash; Slightly</option>
+                            <option value="3" selected>3 &mdash; Somewhat</option>
+                            <option value="4">4 &mdash; Closely</option>
+                            <option value="5">5 &mdash; Very closely</option>
+                        </select>
+                        <button type="button" class="btn btn-default" id="ps_evaluate"><i class="fa fa-shield"></i> Evaluate</button>
+                    </div>
+                    <div id="ps_result" style="display:none;"></div>
+                </div>
+                <hr>
             </div>
             <div class="modal-footer">
                 <button type="button" data-dismiss="modal" class="btn btn-default" onclick="dismiss()">Cancel</button>

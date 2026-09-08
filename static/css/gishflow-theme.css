@@ -530,6 +530,18 @@ a:focus-visible,button:focus-visible,.btn:focus-visible,.form-control:focus-visi
 .gf-timing-label{font-size:11.5px; color:var(--gf-text-3); text-transform:uppercase; letter-spacing:.04em}
 .gf-timing-value{font-size:23px; font-weight:700; color:var(--gf-text); margin-top:4px}
 
+/* ---------- NIST Phish Scale panel (Email Template editor) ---------- */
+.gf-phishscale{margin:6px 0}
+.gf-ps-controls{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:6px 0 10px}
+.gf-ps-plabel{margin:0; font-weight:500; font-size:13px; color:var(--gf-text-2)}
+.gf-ps-controls select{width:auto; max-width:260px}
+.gf-ps-badge{display:inline-block; color:#fff; font-weight:700; padding:6px 16px; border-radius:980px; font-size:14px}
+.gf-ps-meta{margin:10px 0 6px; font-size:13px; color:var(--gf-text-2)}
+.gf-ps-cues{list-style:none; margin:0; padding:0}
+.gf-ps-cues>li{padding:7px 0; border-bottom:1px solid var(--gf-hairline); font-size:13px}
+.gf-ps-cat{display:inline-block; font-size:11px; text-transform:uppercase; letter-spacing:.03em; color:var(--gf-text-3); min-width:132px}
+.gf-ps-detail{color:var(--gf-text-3)}
+
 /* ---------- Dashboard channel filter ---------- */
 .gf-channel-filter{display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap}
 .gf-channel-filter .btn{border-radius:var(--gf-pill)}

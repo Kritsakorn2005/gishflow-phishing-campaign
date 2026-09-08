@@ -87,6 +87,45 @@ function save(idx) {
     }
 }
 
+// renderPhishScale shows the NIST Phish Scale result: a difficulty badge, the
+// cue/premise summary, and the list of detected cues.
+function renderPhishScale(r) {
+    var colors = { least: "#30d158", moderate: "#ff9f0a", very: "#ff3b30" }
+    var color = colors[r.difficulty_key] || "#6c7a89"
+    var html = "<div class='gf-ps-badge' style='background:" + color + "'>" + escapeHtml(r.difficulty) + "</div>"
+    html += "<div class='gf-ps-meta'>Cues detected: <b>" + r.cue_count + "</b> (" + escapeHtml(r.cue_bucket) +
+        ") &middot; Premise alignment: <b>" + escapeHtml(r.premise_level) + "</b></div>"
+    if (r.cues && r.cues.length) {
+        html += "<ul class='gf-ps-cues'>"
+        r.cues.forEach(function (c) {
+            html += "<li><span class='gf-ps-cat'>" + escapeHtml(c.category) + "</span> <b>" +
+                escapeHtml(c.name) + "</b> <span class='gf-ps-detail'>" + escapeHtml(c.detail) + "</span></li>"
+        })
+        html += "</ul>"
+        html += "<p class='text-muted' style='font-size:12px;margin:0'>More cues make it easier for recipients to spot &mdash; these also make great teachable-moment talking points.</p>"
+    } else {
+        html += "<p class='text-muted' style='margin:0'>No obvious cues detected &mdash; this reads as a convincing message.</p>"
+    }
+    $("#ps_result").html(html).show()
+}
+
+// evaluatePhishScale scores the current draft via the NIST Phish Scale endpoint.
+function evaluatePhishScale() {
+    var editor = CKEDITOR.instances["html_editor"]
+    var payload = {
+        subject: $("#subject").val(),
+        html: editor ? editor.getData() : $("#html_editor").val(),
+        text: $("#text_editor").val(),
+        from_address: $("#envelope-sender").val(),
+        premise: parseInt($("#ps_premise").val(), 10)
+    }
+    query("/phishscale", "POST", payload, false)
+        .success(renderPhishScale)
+        .error(function () {
+            errorFlash("Could not evaluate the message")
+        })
+}
+
 function dismiss() {
     $("#modal\\.flashes").empty()
     $("#attachmentsTable").dataTable().DataTable().clear().draw()
@@ -94,6 +133,8 @@ function dismiss() {
     $("#subject").val("")
     $("#text_editor").val("")
     $("#html_editor").val("")
+    $("#ps_result").empty().hide()
+    $("#ps_premise").val("3")
     $("#modal").modal('hide')
 }
 
@@ -371,6 +412,7 @@ function load() {
 }
 
 $(document).ready(function () {
+    $("#ps_evaluate").on("click", evaluatePhishScale)
     // Setup multiple modals
     // Code based on http://miles-by-motorcycle.com/static/bootstrap-modal/index.html
     $('.modal').on('hidden.bs.modal', function (event) {
