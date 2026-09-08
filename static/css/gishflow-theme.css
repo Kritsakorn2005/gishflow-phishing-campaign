@@ -524,6 +524,12 @@ a:focus-visible,button:focus-visible,.btn:focus-visible,.form-control:focus-visi
 /* don't let the long LINE userId wrap mid-id */
 #resultsTable td{white-space:nowrap}
 
+/* ---------- Campaign Results: engagement timing KPIs ---------- */
+.gf-timing-kpis{display:flex; gap:12px; flex-wrap:wrap}
+.gf-timing-kpi{flex:1 1 150px; background:var(--gf-surface-2); border:1px solid var(--gf-hairline); border-radius:var(--gf-r-sm); padding:13px 16px}
+.gf-timing-label{font-size:11.5px; color:var(--gf-text-3); text-transform:uppercase; letter-spacing:.04em}
+.gf-timing-value{font-size:23px; font-weight:700; color:var(--gf-text); margin-top:4px}
+
 /* ---------- Dashboard channel filter ---------- */
 .gf-channel-filter{display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap}
 .gf-channel-filter .btn{border-radius:var(--gf-pill)}

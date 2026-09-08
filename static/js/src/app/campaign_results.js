@@ -667,6 +667,62 @@ function channelLabel(status) {
     return map[status] || status
 }
 
+// formatDuration turns a number of seconds into a compact "1m 30s" / "2h 5m".
+function formatDuration(s) {
+    if (s === null || s === undefined) {
+        return "—"
+    }
+    s = Math.round(s)
+    if (s < 60) {
+        return s + "s"
+    }
+    var m = Math.floor(s / 60), sec = s % 60
+    if (m < 60) {
+        return m + "m" + (sec ? " " + sec + "s" : "")
+    }
+    var h = Math.floor(m / 60)
+    m = m % 60
+    return h + "h" + (m ? " " + m + "m" : "")
+}
+
+// renderTiming fills the "Engagement timing" panel: median/fastest KPIs and a
+// histogram of time-to-click. Hidden when no one has interacted yet.
+function renderTiming(t) {
+    if (!t || !t.recipients || t.recipients.length === 0) {
+        $("#timingPanel").hide()
+        return
+    }
+    $("#kpiOpen").text(formatDuration(t.median_time_to_open))
+    $("#kpiClick").text(formatDuration(t.median_time_to_click))
+    $("#kpiFastest").text(formatDuration(t.fastest_click))
+    $("#kpiSubmit").text(formatDuration(t.median_time_to_submit))
+    $("#timingPanel").show()
+    Highcharts.chart('clickHistogram', {
+        chart: { type: 'column' },
+        title: { text: null },
+        credits: { enabled: false },
+        legend: { enabled: false },
+        xAxis: { categories: t.bucket_labels, title: { text: 'Time to click' } },
+        yAxis: { min: 0, allowDecimals: false, title: { text: 'Recipients' } },
+        tooltip: {
+            formatter: function () {
+                return '<b>' + this.y + '</b> recipient(s) clicked in ' + this.x
+            }
+        },
+        series: [{ data: t.click_buckets, color: '#F39C12' }]
+    })
+}
+
+// loadTiming fetches and renders the engagement timing for this campaign.
+function loadTiming() {
+    var cid = window.location.pathname.split('/').slice(-1)[0]
+    query("/campaigns/" + cid + "/timing", "GET", {}, false)
+        .success(renderTiming)
+        .error(function () {
+            $("#timingPanel").hide()
+        })
+}
+
 function createStatusLabel(status, send_date) {
     var label = (statuses[status] && statuses[status].label) || "label-default";
     var displayStatus = channelLabel(status)
@@ -975,6 +1031,7 @@ function refresh() {
     $("#refresh_message").show()
     $("#refresh_btn").hide()
     poll()
+    loadTiming()
     clearTimeout(setRefresh)
     setRefresh = setTimeout(refresh, 60000)
 };
@@ -1028,6 +1085,7 @@ $(document).ready(function () {
         }
     })
     load();
+    loadTiming();
 
     // Start the polling loop
     setRefresh = setTimeout(refresh, 60000)

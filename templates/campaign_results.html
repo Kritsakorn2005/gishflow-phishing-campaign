@@ -68,6 +68,32 @@
             </div>
         </div>
 
+        <!-- Engagement timing -->
+        <div class="panel gf-card" id="timingPanel" style="display:none;">
+            <div class="panel-heading">Engagement timing<span class="gf-sub">how fast recipients reacted</span></div>
+            <div class="panel-body">
+                <div class="gf-timing-kpis">
+                    <div class="gf-timing-kpi">
+                        <div class="gf-timing-label">Median time to open</div>
+                        <div class="gf-timing-value" id="kpiOpen">&mdash;</div>
+                    </div>
+                    <div class="gf-timing-kpi">
+                        <div class="gf-timing-label">Median time to click</div>
+                        <div class="gf-timing-value" id="kpiClick">&mdash;</div>
+                    </div>
+                    <div class="gf-timing-kpi">
+                        <div class="gf-timing-label">Fastest click</div>
+                        <div class="gf-timing-value" id="kpiFastest">&mdash;</div>
+                    </div>
+                    <div class="gf-timing-kpi">
+                        <div class="gf-timing-label">Median time to submit</div>
+                        <div class="gf-timing-value" id="kpiSubmit">&mdash;</div>
+                    </div>
+                </div>
+                <div id="clickHistogram" style="height:220px; margin-top:10px;"></div>
+            </div>
+        </div>
+
         <!-- Targets map -->
         <div class="row" id="resultsMapContainer">
             <div class="col-md-7">
