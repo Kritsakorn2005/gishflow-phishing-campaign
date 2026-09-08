@@ -1,0 +1,53 @@
+# GishFlow production deployment: the app behind Caddy for automatic HTTPS.
+#
+#   1. Point a DNS A record for ${PHISH_DOMAIN} at this server's public IP.
+#   2. Copy .env.example to .env and fill it in.
+#   3. docker compose up -d --build
+#
+# The phishing server (pages, tracking, /line/webhook) is served publicly over
+# HTTPS by Caddy. The admin panel stays bound to localhost only - reach it with
+# an SSH tunnel:  ssh -L 3333:localhost:3333 user@server  then open localhost:3333
+services:
+  gishflow:
+    build: ..
+    image: gishflow:latest
+    restart: unless-stopped
+    expose:
+      - "80" # phishing server, proxied by Caddy (not published directly)
+    ports:
+      - "127.0.0.1:3333:3333" # admin panel, localhost only (use an SSH tunnel)
+    environment:
+      - ADMIN_LISTEN_URL=0.0.0.0:3333
+      - ADMIN_USE_TLS=false
+      - PHISH_LISTEN_URL=0.0.0.0:80
+      - PHISH_USE_TLS=false
+      - DB_NAME=sqlite3
+      - DB_FILE_PATH=/opt/gophish/data/gophish.db
+      - CONTACT_ADDRESS=${CONTACT_ADDRESS}
+      # AI pretext generator (optional; leave blank to disable)
+      - AI_BASE_URL=${AI_BASE_URL}
+      - AI_API_KEY=${AI_API_KEY}
+      - AI_MODEL=${AI_MODEL}
+      - AI_PROVIDER=${AI_PROVIDER}
+    volumes:
+      - gishflow-data:/opt/gophish/data
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on:
+      - gishflow
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - PHISH_DOMAIN=${PHISH_DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
+volumes:
+  gishflow-data:
+  caddy-data:
+  caddy-config:

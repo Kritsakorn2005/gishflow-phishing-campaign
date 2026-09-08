@@ -81,8 +81,22 @@ if [ -n "${DB_FILE_PATH+set}" ] ; then
         cat config.json.tmp > config.json
 fi
 
-echo "Runtime configuration: "
-cat config.json
+# set config for the AI pretext generator (GishFlow)
+if [ -n "${AI_BASE_URL+set}" ] ; then
+    jq -r --arg V "${AI_BASE_URL}" '.ai.base_url = $V' config.json > config.json.tmp && cat config.json.tmp > config.json
+fi
+if [ -n "${AI_API_KEY+set}" ] ; then
+    jq -r --arg V "${AI_API_KEY}" '.ai.api_key = $V' config.json > config.json.tmp && cat config.json.tmp > config.json
+fi
+if [ -n "${AI_MODEL+set}" ] ; then
+    jq -r --arg V "${AI_MODEL}" '.ai.model = $V' config.json > config.json.tmp && cat config.json.tmp > config.json
+fi
+if [ -n "${AI_PROVIDER+set}" ] ; then
+    jq -r --arg V "${AI_PROVIDER}" '.ai.provider = $V' config.json > config.json.tmp && cat config.json.tmp > config.json
+fi
+
+echo "Runtime configuration (secrets redacted): "
+jq '(.ai.api_key) |= (if . == "" then . else "***" end)' config.json 2>/dev/null || cat config.json
 
 # start gophish
 ./gophish

@@ -29,3 +29,6 @@ gophish_admin.key
 *.exe
 gophish.db*
 gophish
+
+# GishFlow deploy secrets
+deploy/.env

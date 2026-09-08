@@ -1,0 +1,7 @@
+# Caddy automatically obtains and renews a Let's Encrypt certificate for the
+# phishing domain, then reverse-proxies to the GishFlow phishing server.
+# Requires a DNS A record for PHISH_DOMAIN pointing at this server, and ports
+# 80 + 443 reachable from the internet.
+{$PHISH_DOMAIN} {
+	reverse_proxy gishflow:80
+}

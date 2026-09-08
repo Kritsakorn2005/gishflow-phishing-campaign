@@ -36,6 +36,10 @@ RUN chown app. config.json
 
 RUN setcap 'cap_net_bind_service=+ep' /opt/gophish/gophish
 
+# Data directory for the sqlite DB, owned by the runtime user so a fresh named
+# volume mounted here inherits writable ownership (GishFlow: DB_FILE_PATH).
+RUN mkdir -p /opt/gophish/data && chown app /opt/gophish/data
+
 USER app
 RUN sed -i 's/127.0.0.1/0.0.0.0/g' config.json
 RUN touch config.json.tmp
