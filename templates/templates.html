@@ -45,6 +45,33 @@
             </div>
             <div class="modal-body">
                 <div class="row" id="modal.flashes"></div>
+                <div class="gf-ai-panel">
+                    <button type="button" class="btn btn-default btn-sm" id="ai_toggle">
+                        <i class="fa fa-magic"></i> Generate with AI</button>
+                    <div id="ai_form" style="display:none; margin-top:10px;">
+                        <input type="text" class="form-control" id="ai_scenario"
+                            placeholder="Scenario (e.g. IT password reset, HR payroll notice)" />
+                        <input type="text" class="form-control" id="ai_context" style="margin-top:6px;"
+                            placeholder="Target context (e.g. university staff, finance team)" />
+                        <div class="gf-ai-controls">
+                            <select id="ai_language" class="form-control">
+                                <option value="Thai">ไทย</option>
+                                <option value="English">English</option>
+                            </select>
+                            <select id="ai_count" class="form-control">
+                                <option value="1">1 variant</option>
+                                <option value="3" selected>3 variants</option>
+                                <option value="5">5 variants</option>
+                            </select>
+                            <button type="button" class="btn btn-primary btn-sm" id="ai_generate">
+                                <i class="fa fa-magic"></i> Generate</button>
+                            <span id="ai_status" class="text-muted"></span>
+                        </div>
+                        <div id="ai_results" style="margin-top:10px;"></div>
+                        <p class="help-block" style="margin:6px 0 0;">For authorized, consented training simulations only.</p>
+                    </div>
+                </div>
+                <hr>
                 <label class="control-label" for="name">Name:</label>
                 <div class="form-group">
                     <input type="text" class="form-control" ng-model="template.name" placeholder="Template name" id="name"

@@ -26,6 +26,17 @@ type PhishServer struct {
 	KeyPath   string `json:"key_path"`
 }
 
+// AIConfig holds the settings for the AI pretext generator. BaseURL is the full
+// endpoint URL (e.g. an OpenAI-compatible ".../chat/completions" or Anthropic's
+// ".../v1/messages"). Provider selects the request/response shape: "openai"
+// (default) or "anthropic".
+type AIConfig struct {
+	BaseURL  string `json:"base_url"`
+	APIKey   string `json:"api_key"`
+	Model    string `json:"model"`
+	Provider string `json:"provider"`
+}
+
 // Config represents the configuration information.
 type Config struct {
 	AdminConf      AdminServer `json:"admin_server"`
@@ -36,6 +47,7 @@ type Config struct {
 	MigrationsPath string      `json:"migrations_prefix"`
 	TestFlag       bool        `json:"test_flag"`
 	ContactAddress string      `json:"contact_address"`
+	AIConf         AIConfig    `json:"ai"`
 	Logging        *log.Config `json:"logging"`
 }
 

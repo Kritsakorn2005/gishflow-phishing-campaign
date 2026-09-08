@@ -87,6 +87,75 @@ function save(idx) {
     }
 }
 
+var aiVariants = []
+
+// renderAIVariants shows the AI-generated pretext options as cards.
+function renderAIVariants(vs) {
+    if (!vs || vs.length === 0) {
+        $("#ai_results").html("<p class='text-muted'>No variants returned.</p>")
+        return
+    }
+    var html = ""
+    vs.forEach(function (v, i) {
+        html += "<div class='gf-ai-card'>"
+        html += "<div class='gf-ai-subject'>" + escapeHtml(v.subject || "(no subject)") + "</div>"
+        if (v.red_flags && v.red_flags.length) {
+            html += "<div class='gf-ai-flags'>Red flags: " + v.red_flags.map(escapeHtml).join(", ") + "</div>"
+        }
+        html += "<button type='button' class='btn btn-default btn-xs' onclick='useVariant(" + i + ")'>Use this</button>"
+        html += "</div>"
+    })
+    $("#ai_results").html(html)
+}
+
+// useVariant fills the editor with the chosen variant and scores it with the
+// NIST Phish Scale (wiring the AI generator to the scorer).
+function useVariant(i) {
+    var v = aiVariants[i]
+    if (!v) {
+        return
+    }
+    $("#subject").val(v.subject || "")
+    var editor = CKEDITOR.instances["html_editor"]
+    if (editor) {
+        editor.setData(v.body_html || "")
+    } else {
+        $("#html_editor").val(v.body_html || "")
+    }
+    successFlashFade("Variant applied to the editor", 2)
+    if (typeof evaluatePhishScale === "function") {
+        evaluatePhishScale()
+    }
+}
+
+// aiGenerate requests pretext variants from the AI endpoint.
+function aiGenerate() {
+    var payload = {
+        scenario: $("#ai_scenario").val(),
+        context: $("#ai_context").val(),
+        language: $("#ai_language").val(),
+        count: parseInt($("#ai_count").val(), 10)
+    }
+    if (!payload.scenario.trim()) {
+        modalError("Enter a scenario for the AI to work from")
+        return
+    }
+    $("#ai_status").text("Generating…")
+    $("#ai_generate").prop("disabled", true)
+    query("/ai/pretext", "POST", payload, false)
+        .success(function (vs) {
+            aiVariants = vs || []
+            renderAIVariants(aiVariants)
+            $("#ai_status").text("")
+            $("#ai_generate").prop("disabled", false)
+        })
+        .error(function (data) {
+            $("#ai_status").text("")
+            $("#ai_generate").prop("disabled", false)
+            modalError(data.responseJSON ? data.responseJSON.message : "AI request failed")
+        })
+}
+
 // renderPhishScale shows the NIST Phish Scale result: a difficulty badge, the
 // cue/premise summary, and the list of detected cues.
 function renderPhishScale(r) {
@@ -135,6 +204,11 @@ function dismiss() {
     $("#html_editor").val("")
     $("#ps_result").empty().hide()
     $("#ps_premise").val("3")
+    $("#ai_form").hide()
+    $("#ai_results").empty()
+    $("#ai_scenario").val("")
+    $("#ai_context").val("")
+    aiVariants = []
     $("#modal").modal('hide')
 }
 
@@ -413,6 +487,8 @@ function load() {
 
 $(document).ready(function () {
     $("#ps_evaluate").on("click", evaluatePhishScale)
+    $("#ai_toggle").on("click", function () { $("#ai_form").toggle() })
+    $("#ai_generate").on("click", aiGenerate)
     // Setup multiple modals
     // Code based on http://miles-by-motorcycle.com/static/bootstrap-modal/index.html
     $('.modal').on('hidden.bs.modal', function (event) {
