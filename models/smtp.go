@@ -91,6 +91,16 @@ func (s SMTP) TableName() string {
 	return "smtp"
 }
 
+// GetLineProfiles returns every LINE sending profile (across all users). Used by
+// the public LINE webhook, which has no session, to look up channel secrets (in
+// Username) for signature verification and access tokens (in Password) for
+// fetching display names.
+func GetLineProfiles() ([]SMTP, error) {
+	ss := []SMTP{}
+	err := db.Where("interface_type=?", InterfaceLine).Find(&ss).Error
+	return ss, err
+}
+
 // Validate ensures that SMTP configs/connections are valid
 func (s *SMTP) Validate() error {
 	// A LINE channel is validated differently: it only needs a channel access

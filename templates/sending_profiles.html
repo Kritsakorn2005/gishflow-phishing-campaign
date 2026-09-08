@@ -105,6 +105,9 @@
                             <label class="control-label" for="line_token">LINE Channel Access Token:</label>
                             <input type="password" class="form-control" id="line_token" placeholder="Long-lived channel access token" autocomplete="new-password" />
                             <p class="help-block">From LINE Developers &rarr; your Messaging API channel. Recipients must have added your Official Account as a friend to receive messages.</p>
+                            <label class="control-label" for="line_secret">Channel Secret <small class="text-muted">(optional)</small>:</label>
+                            <input type="password" class="form-control" id="line_secret" placeholder="Channel secret (for webhook signature verification)" autocomplete="new-password" />
+                            <p class="help-block">Optional. Set it to verify the <code class="qr">/line/webhook</code> signature so only genuine LINE requests are accepted when auto-collecting userIds.</p>
                         </div>
                     </div>
                     <div id="sms_fields" style="display:none;">

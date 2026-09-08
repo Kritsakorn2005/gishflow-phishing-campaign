@@ -3,6 +3,9 @@ package controllers
 import (
 	"compress/gzip"
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -375,6 +378,19 @@ type lineWebhookBody struct {
 	} `json:"events"`
 }
 
+// verifyLineSignature checks the X-Line-Signature header, which is the
+// base64-encoded HMAC-SHA256 of the raw request body keyed by the channel
+// secret. It's a constant-time comparison.
+func verifyLineSignature(secret string, body []byte, signature string) bool {
+	if secret == "" || signature == "" {
+		return false
+	}
+	mac := hmac.New(sha256.New, []byte(secret))
+	mac.Write(body)
+	expected := base64.StdEncoding.EncodeToString(mac.Sum(nil))
+	return hmac.Equal([]byte(expected), []byte(signature))
+}
+
 // LineWebhookHandler receives events from a LINE Official Account (follow,
 // message, etc.) and records the sender's userId as a LineContact, so
 // recipients can be collected automatically instead of looked up by hand.
@@ -386,6 +402,35 @@ func (ps *PhishingServer) LineWebhookHandler(w http.ResponseWriter, r *http.Requ
 		w.WriteHeader(http.StatusOK)
 		return
 	}
+
+	// Look up configured LINE profiles: their channel secret (Username) verifies
+	// the signature, and their access token (Password) fetches display names.
+	profiles, _ := models.GetLineProfiles()
+	token := ""
+	hasSecret := false
+	verified := false
+	sig := r.Header.Get("X-Line-Signature")
+	for _, p := range profiles {
+		if token == "" && p.Password != "" {
+			token = p.Password // default token (first profile), for display names
+		}
+		if p.Username != "" {
+			hasSecret = true
+			if verifyLineSignature(p.Username, body, sig) {
+				verified = true
+				token = p.Password // prefer the token of the matching OA
+				break
+			}
+		}
+	}
+	// If any LINE profile has a channel secret configured, require a valid
+	// signature. If none do, accept unverified (keeps setup simple).
+	if hasSecret && !verified {
+		log.Error("LINE webhook: invalid signature")
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
 	var wb lineWebhookBody
 	if err := json.Unmarshal(body, &wb); err != nil {
 		log.Error(err)
@@ -396,7 +441,8 @@ func (ps *PhishingServer) LineWebhookHandler(w http.ResponseWriter, r *http.Requ
 		if e.Source.UserID == "" {
 			continue
 		}
-		if err := models.SaveLineContact(e.Source.UserID, ""); err != nil {
+		name := models.GetLineDisplayName(token, e.Source.UserID)
+		if err := models.SaveLineContact(e.Source.UserID, name); err != nil {
 			log.Error(err)
 		}
 	}

@@ -68,9 +68,11 @@ function save(idx) {
     profile.username = $("#username").val()
     profile.password = $("#password").val()
     profile.ignore_cert_errors = $("#ignore_cert_errors").prop("checked")
-    // For a LINE channel, the token is stored in the password field.
+    // For a LINE channel, the token is stored in the password field and the
+    // (optional) channel secret in the username field.
     if (profile.interface_type === "LINE") {
         profile.password = $("#line_token").val()
+        profile.username = $("#line_secret").val()
     }
     // For an SMS channel: key -> username, secret -> password, sender -> from.
     if (profile.interface_type === "SMS") {
@@ -115,6 +117,7 @@ function dismiss() {
     $("#password").val("")
     $("#ignore_cert_errors").prop("checked", true)
     $("#line_token").val("")
+    $("#line_secret").val("")
     $("#sms_key").val("")
     $("#sms_secret").val("")
     $("#sms_sender").val("")
@@ -193,6 +196,7 @@ function edit(idx) {
             addCustomHeader(record.key, record.value)
         });
         $("#line_token").val(profile.interface_type === "LINE" ? profile.password : "")
+        $("#line_secret").val(profile.interface_type === "LINE" ? profile.username : "")
         if (profile.interface_type === "SMS") {
             $("#sms_key").val(profile.username)
             $("#sms_secret").val(profile.password)
@@ -219,6 +223,7 @@ function copy(idx) {
     $("#password").val(profile.password)
     $("#ignore_cert_errors").prop("checked", profile.ignore_cert_errors)
     $("#line_token").val(profile.interface_type === "LINE" ? profile.password : "")
+    $("#line_secret").val(profile.interface_type === "LINE" ? profile.username : "")
     if (profile.interface_type === "SMS") {
         $("#sms_key").val(profile.username)
         $("#sms_secret").val(profile.password)
