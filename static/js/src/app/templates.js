@@ -134,24 +134,28 @@ function aiGenerate() {
         scenario: $("#ai_scenario").val(),
         context: $("#ai_context").val(),
         language: $("#ai_language").val(),
+        model: $("#ai_model").val(),
         count: parseInt($("#ai_count").val(), 10)
     }
     if (!payload.scenario.trim()) {
         modalError("Enter a scenario for the AI to work from")
         return
     }
-    $("#ai_status").text("Generating…")
-    $("#ai_generate").prop("disabled", true)
+    // The LLM can take 10-30s, so show a clear loading state.
+    $("#ai_results").empty()
+    $("#ai_status").html("<i class='fa fa-spinner fa-spin'></i> Generating with " +
+        escapeHtml(payload.model) + "… this can take 10–30 seconds")
+    $("#ai_generate").prop("disabled", true).html("<i class='fa fa-spinner fa-spin'></i> Generating")
     query("/ai/pretext", "POST", payload, false)
         .success(function (vs) {
             aiVariants = vs || []
             renderAIVariants(aiVariants)
-            $("#ai_status").text("")
-            $("#ai_generate").prop("disabled", false)
+            $("#ai_status").empty()
+            $("#ai_generate").prop("disabled", false).html("<i class='fa fa-magic'></i> Generate")
         })
         .error(function (data) {
-            $("#ai_status").text("")
-            $("#ai_generate").prop("disabled", false)
+            $("#ai_status").empty()
+            $("#ai_generate").prop("disabled", false).html("<i class='fa fa-magic'></i> Generate")
             modalError(data.responseJSON ? data.responseJSON.message : "AI request failed")
         })
 }

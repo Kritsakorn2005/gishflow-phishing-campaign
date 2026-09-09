@@ -49,11 +49,23 @@
                     <button type="button" class="btn btn-default btn-sm" id="ai_toggle">
                         <i class="fa fa-magic"></i> Generate with AI</button>
                     <div id="ai_form" style="display:none; margin-top:10px;">
+                        <label class="control-label" for="ai_scenario">Scenario
+                            <small class="text-muted">— what the fake message is about</small></label>
                         <input type="text" class="form-control" id="ai_scenario"
-                            placeholder="Scenario (e.g. IT password reset, HR payroll notice)" />
-                        <input type="text" class="form-control" id="ai_context" style="margin-top:6px;"
-                            placeholder="Target context (e.g. university staff, finance team)" />
+                            placeholder="e.g. IT password reset, HR payroll notice" />
+                        <label class="control-label" for="ai_context" style="margin-top:8px;">Target context
+                            <small class="text-muted">— who receives it</small></label>
+                        <input type="text" class="form-control" id="ai_context"
+                            placeholder="e.g. university staff, finance team" />
                         <div class="gf-ai-controls">
+                            <select id="ai_model" class="form-control" title="AI model">
+                                <option value="claude-sonnet-5">Claude Sonnet 5</option>
+                                <option value="gemini-3.7-flash">Gemini 3.7 Flash</option>
+                                <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash Lite</option>
+                                <option value="deepseek-v4-pro">DeepSeek v4 Pro</option>
+                                <option value="llama-4-maverick">Llama 4 Maverick</option>
+                                <option value="mistral-large-2512">Mistral Large</option>
+                            </select>
                             <select id="ai_language" class="form-control">
                                 <option value="Thai">ไทย</option>
                                 <option value="English">English</option>
@@ -65,8 +77,8 @@
                             </select>
                             <button type="button" class="btn btn-primary btn-sm" id="ai_generate">
                                 <i class="fa fa-magic"></i> Generate</button>
-                            <span id="ai_status" class="text-muted"></span>
                         </div>
+                        <div id="ai_status" style="margin-top:8px;"></div>
                         <div id="ai_results" style="margin-top:10px;"></div>
                         <p class="help-block" style="margin:6px 0 0;">For authorized, consented training simulations only.</p>
                     </div>

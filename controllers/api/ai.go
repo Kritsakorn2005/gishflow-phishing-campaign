@@ -12,6 +12,7 @@ type aiPretextRequest struct {
 	Scenario string `json:"scenario"`
 	Context  string `json:"context"`
 	Language string `json:"language"`
+	Model    string `json:"model"`
 	Count    int    `json:"count"`
 }
 
@@ -34,7 +35,7 @@ func (as *Server) AIPretext(w http.ResponseWriter, r *http.Request) {
 	if req.Count == 0 {
 		req.Count = 3
 	}
-	variants, err := models.GeneratePretexts(req.Scenario, req.Context, req.Language, req.Count)
+	variants, err := models.GeneratePretexts(req.Scenario, req.Context, req.Language, req.Model, req.Count)
 	if err != nil {
 		JSONResponse(w, models.Response{Success: false, Message: err.Error()}, http.StatusBadGateway)
 		return

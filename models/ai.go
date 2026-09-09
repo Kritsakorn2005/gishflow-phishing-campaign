@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	log "github.com/gophish/gophish/logger"
 )
 
 // PretextVariant is one AI-generated phishing pretext for a training
@@ -37,17 +39,19 @@ func buildPretextPrompt(scenario, targetContext, language string, n int) (string
 		"simulations for internal employee training. Generate realistic simulated phishing email pretexts " +
 		"for the given scenario. This is a controlled exercise with participant consent and no real payloads. " +
 		"Use the Gophish template variables {{.FirstName}} for personalization and {{.URL}} for the link. " +
-		"Respond with ONLY a JSON object of the form " +
-		"{\"variants\":[{\"subject\":\"...\",\"body_html\":\"...\",\"red_flags\":[\"...\"]}]}. " +
 		"body_html is simple inline HTML. red_flags lists the phishing cues a trainee could notice. " +
-		"Write the email in " + language + "."
+		"Write the email in " + language + ". " +
+		"Output ONLY a raw JSON object of the exact form " +
+		"{\"variants\":[{\"subject\":\"...\",\"body_html\":\"...\",\"red_flags\":[\"...\"]}]} " +
+		"- no markdown code fences, no explanation, and no text before or after the JSON."
 	user := fmt.Sprintf("Scenario: %s\nTarget context: %s\nProduce exactly %d distinct variant(s).",
 		strings.TrimSpace(scenario), strings.TrimSpace(targetContext), n)
 	return system, user
 }
 
-// GeneratePretexts asks the configured AI provider for n pretext variants.
-func GeneratePretexts(scenario, targetContext, language string, n int) ([]PretextVariant, error) {
+// GeneratePretexts asks the configured AI provider for n pretext variants. When
+// model is empty the configured default model is used.
+func GeneratePretexts(scenario, targetContext, language, model string, n int) ([]PretextVariant, error) {
 	if !AIConfigured() {
 		return nil, ErrAINotConfigured
 	}
@@ -60,25 +64,32 @@ func GeneratePretexts(scenario, targetContext, language string, n int) ([]Pretex
 	if strings.TrimSpace(language) == "" {
 		language = "English"
 	}
+	if strings.TrimSpace(model) == "" {
+		model = conf.AIConf.Model
+	}
 	system, user := buildPretextPrompt(scenario, targetContext, language, n)
 
 	var content string
 	var err error
 	if strings.EqualFold(conf.AIConf.Provider, "anthropic") {
-		content, err = aiCallAnthropic(system, user)
+		content, err = aiCallAnthropic(system, user, model)
 	} else {
-		content, err = aiCallOpenAI(system, user)
+		content, err = aiCallOpenAI(system, user, model)
 	}
 	if err != nil {
 		return nil, err
 	}
-	return parseVariants(content)
+	variants, perr := parseVariants(content)
+	if perr != nil {
+		log.Errorf("AI pretext parse failed (model=%s). Raw response: %s", model, content)
+	}
+	return variants, perr
 }
 
 // aiCallOpenAI calls an OpenAI-compatible chat-completions endpoint.
-func aiCallOpenAI(system, user string) (string, error) {
+func aiCallOpenAI(system, user, model string) (string, error) {
 	payload := map[string]interface{}{
-		"model": conf.AIConf.Model,
+		"model": model,
 		"messages": []map[string]string{
 			{"role": "system", "content": system},
 			{"role": "user", "content": user},
@@ -108,9 +119,9 @@ func aiCallOpenAI(system, user string) (string, error) {
 }
 
 // aiCallAnthropic calls the Anthropic Messages API.
-func aiCallAnthropic(system, user string) (string, error) {
+func aiCallAnthropic(system, user, model string) (string, error) {
 	payload := map[string]interface{}{
-		"model":      conf.AIConf.Model,
+		"model":      model,
 		"max_tokens": 2000,
 		"system":     system,
 		"messages":   []map[string]string{{"role": "user", "content": user}},
