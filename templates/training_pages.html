@@ -64,6 +64,64 @@
                 <label class="control-label">Quiz
                     <small class="text-muted">(optional — shown as questions below the training content)</small>
                 </label>
+                <div class="panel panel-default" style="margin-top:8px;background:#f9fafb;">
+                    <div class="panel-body">
+                        <div style="margin-bottom:10px;"><i class="fa fa-magic"></i> <b>AI Generate Quiz</b>
+                            <small class="text-muted">— สร้างคำถามจากเนื้อหา training ด้านบนอัตโนมัติ</small>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12" style="margin-bottom:10px;">
+                                <label class="control-label" for="ai_quiz_topic">Focus topic (optional)</label>
+                                <input type="text" class="form-control" id="ai_quiz_topic"
+                                    placeholder="เช่น การสังเกต URL ปลอม — เว้นว่างได้ (อิงเนื้อหาทั้งหมด)">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <label class="control-label" for="ai_quiz_count">จำนวนข้อ</label>
+                                <select id="ai_quiz_count" class="form-control">
+                                    <option value="3">3 ข้อ</option>
+                                    <option value="5" selected>5 ข้อ</option>
+                                    <option value="10">10 ข้อ</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-3">
+                                <label class="control-label" for="ai_quiz_difficulty">ความยาก</label>
+                                <select id="ai_quiz_difficulty" class="form-control">
+                                    <option value="easy">ง่าย</option>
+                                    <option value="medium" selected>ปานกลาง</option>
+                                    <option value="hard">ยาก</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-3">
+                                <label class="control-label" for="ai_quiz_language">ภาษา</label>
+                                <select id="ai_quiz_language" class="form-control">
+                                    <option value="Thai" selected>ไทย</option>
+                                    <option value="English">English</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-3">
+                                <label class="control-label" for="ai_quiz_model">โมเดล</label>
+                                <select id="ai_quiz_model" class="form-control" title="AI model">
+                                    <option value="claude-sonnet-5">Claude Sonnet 5</option>
+                                    <option value="gemini-3.7-flash">Gemini 3.7 Flash</option>
+                                    <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash Lite</option>
+                                    <option value="deepseek-v4-pro">DeepSeek v4 Pro</option>
+                                    <option value="llama-4-maverick">Llama 4 Maverick</option>
+                                    <option value="mistral-large-2512">Mistral Large</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div style="margin-top:12px;">
+                            <button type="button" class="btn btn-primary btn-sm" id="ai_quiz_generate">
+                                <i class="fa fa-magic"></i> Generate Quiz</button>
+                            <span id="ai_quiz_status" style="margin-left:10px;"></span>
+                        </div>
+                        <div class="text-muted" style="margin-top:8px;font-size:12px;">
+                            คำถามที่สร้างจะถูกเพิ่มต่อท้าย quiz ด้านล่าง — แก้ไข/ลบได้
+                        </div>
+                    </div>
+                </div>
                 <div id="quizBuilder"></div>
                 <button type="button" class="btn btn-default btn-sm" id="addQuestionBtn">
                     <i class="fa fa-plus"></i> Add question</button>

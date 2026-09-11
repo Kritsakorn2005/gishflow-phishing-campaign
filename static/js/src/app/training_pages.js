@@ -77,6 +77,45 @@ function renderQuiz(quizStr) {
     } catch (e) { /* malformed quiz, start empty */ }
 }
 
+// aiGenerateQuiz asks the AI backend for quiz questions based on the current
+// training content and the chosen options, then appends them to the builder.
+function aiGenerateQuiz() {
+    var editor = CKEDITOR.instances["html_editor"]
+    var content = editor ? editor.getData() : $("#html_editor").val()
+    var topic = $("#ai_quiz_topic").val()
+    if (!content.trim() && !topic.trim()) {
+        $("#ai_quiz_status").html("<span class='text-danger'>ใส่เนื้อหา training หรือ topic อย่างน้อยหนึ่งอย่างก่อนครับ</span>")
+        return
+    }
+    var payload = {
+        topic: topic,
+        content: content,
+        language: $("#ai_quiz_language").val(),
+        difficulty: $("#ai_quiz_difficulty").val(),
+        model: $("#ai_quiz_model").val(),
+        count: parseInt($("#ai_quiz_count").val(), 10) || 5
+    }
+    $("#ai_quiz_status").html("<i class='fa fa-spinner fa-spin'></i> กำลังสร้างด้วย " + escapeHtml(payload.model) + "… อาจใช้เวลา 10–30 วินาที")
+    $("#ai_quiz_generate").prop("disabled", true).html("<i class='fa fa-spinner fa-spin'></i> Generating")
+    query("/ai/quiz", "POST", payload, false)
+        .success(function (questions) {
+            $("#ai_quiz_generate").prop("disabled", false).html("<i class='fa fa-magic'></i> Generate Quiz")
+            if (!questions || questions.length === 0) {
+                $("#ai_quiz_status").html("<span class='text-warning'>AI ไม่ได้สร้างคำถาม ลองใหม่อีกครั้ง</span>")
+                return
+            }
+            $.each(questions, function (i, q) {
+                addQuestion(q)
+            })
+            $("#ai_quiz_status").html("<span class='text-success'><i class='fa fa-check'></i> เพิ่ม " + questions.length + " ข้อแล้ว</span>")
+        })
+        .error(function (data) {
+            $("#ai_quiz_generate").prop("disabled", false).html("<i class='fa fa-magic'></i> Generate Quiz")
+            var msg = (data && data.responseJSON && data.responseJSON.message) ? data.responseJSON.message : "เกิดข้อผิดพลาดในการเรียก AI"
+            $("#ai_quiz_status").html("<span class='text-danger'>" + escapeHtml(msg) + "</span>")
+        })
+}
+
 // save attempts to POST or PUT a training page to /api/training/
 function save(idx) {
     var page = {}
@@ -114,6 +153,8 @@ function dismiss() {
     $("#name").val("")
     $("#html_editor").val("")
     $("#quizBuilder").empty()
+    $("#ai_quiz_topic").val("")
+    $("#ai_quiz_status").empty()
     $("#modal").modal('hide')
 }
 
@@ -237,6 +278,7 @@ $(document).ready(function () {
     $("#addQuestionBtn").on("click", function () {
         addQuestion()
     })
+    $("#ai_quiz_generate").on("click", aiGenerateQuiz)
     $("#quizBuilder").on("click", ".gfq-add-choice", function () {
         addChoice($(this).closest(".gf-quiz-q"), "", false)
     })

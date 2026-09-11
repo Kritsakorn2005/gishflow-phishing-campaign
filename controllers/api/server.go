@@ -85,6 +85,7 @@ func (as *Server) registerRoutes() {
 	router.HandleFunc("/line_contacts/{id:[0-9]+}", as.LineContact)
 	router.HandleFunc("/phishscale", as.PhishScale)
 	router.HandleFunc("/ai/pretext", as.AIPretext)
+	router.HandleFunc("/ai/quiz", as.AIQuiz)
 	router.HandleFunc("/qr", as.QRCode)
 	router.HandleFunc("/smtp/", as.SendingProfiles)
 	router.HandleFunc("/smtp/{id:[0-9]+}", as.SendingProfile)

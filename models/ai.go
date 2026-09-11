@@ -86,6 +86,107 @@ func GeneratePretexts(scenario, targetContext, language, model string, n int) ([
 	return variants, perr
 }
 
+// quizDifficultyGuidance maps a difficulty level to instructions for the model.
+func quizDifficultyGuidance(difficulty string) string {
+	switch strings.ToLower(strings.TrimSpace(difficulty)) {
+	case "easy":
+		return "Easy: test basic recall of facts stated directly in the training content. Make the distractors clearly wrong."
+	case "hard":
+		return "Hard: scenario-based questions that require judgment and applying the concepts to new situations. Make the distractors subtle and tempting so the learner must think carefully."
+	default:
+		return "Medium: require the learner to understand and apply the concepts, not just recall them. Make the distractors plausible."
+	}
+}
+
+// buildQuizPrompt returns the system and user messages for generating a
+// multiple-choice quiz that tests a security-awareness training page.
+func buildQuizPrompt(topic, content, language, difficulty string, n int) (string, string) {
+	system := "You are creating a multiple-choice quiz for a security-awareness training exercise. " +
+		"Generate quiz questions that test whether the learner understood the training material. " +
+		"Each question must have exactly one correct answer and 3 to 4 answer choices. " +
+		quizDifficultyGuidance(difficulty) + " " +
+		"Write every question and choice in " + language + ". " +
+		"Output ONLY a raw JSON array of the exact form " +
+		"[{\"q\":\"...\",\"choices\":[\"...\",\"...\",\"...\"],\"answer\":0}] " +
+		"where answer is the zero-based index of the correct choice in that question's choices array. " +
+		"No markdown code fences, no explanation, and no text before or after the JSON."
+	user := "Training content the quiz should test:\n" + strings.TrimSpace(content)
+	if t := strings.TrimSpace(topic); t != "" {
+		user += "\n\nFocus especially on this topic: " + t
+	}
+	user += fmt.Sprintf("\n\nProduce exactly %d question(s).", n)
+	return system, user
+}
+
+// GenerateQuiz asks the configured AI provider for n multiple-choice quiz
+// questions based on the given training content. When model is empty the
+// configured default model is used.
+func GenerateQuiz(topic, content, language, difficulty, model string, n int) ([]QuizQuestion, error) {
+	if !AIConfigured() {
+		return nil, ErrAINotConfigured
+	}
+	if n < 1 {
+		n = 1
+	}
+	if n > 20 {
+		n = 20
+	}
+	if strings.TrimSpace(language) == "" {
+		language = "English"
+	}
+	if strings.TrimSpace(model) == "" {
+		model = conf.AIConf.Model
+	}
+	system, user := buildQuizPrompt(topic, content, language, difficulty, n)
+
+	var content2 string
+	var err error
+	if strings.EqualFold(conf.AIConf.Provider, "anthropic") {
+		content2, err = aiCallAnthropic(system, user, model)
+	} else {
+		content2, err = aiCallOpenAI(system, user, model)
+	}
+	if err != nil {
+		return nil, err
+	}
+	questions, perr := parseQuizQuestions(content2)
+	if perr != nil {
+		log.Errorf("AI quiz parse failed (model=%s). Raw response: %s", model, content2)
+	}
+	return questions, perr
+}
+
+// parseQuizQuestions extracts quiz questions from the model's text response,
+// tolerating markdown fences and either a bare array or a {"questions":[...]}
+// object. Malformed questions (blank text or fewer than two choices) are
+// dropped, and an out-of-range answer index is clamped to the first choice.
+func parseQuizQuestions(content string) ([]QuizQuestion, error) {
+	js := extractJSON(content)
+	var arr []QuizQuestion
+	if err := json.Unmarshal([]byte(js), &arr); err != nil || len(arr) == 0 {
+		var wrap struct {
+			Questions []QuizQuestion `json:"questions"`
+		}
+		if err := json.Unmarshal([]byte(js), &wrap); err == nil {
+			arr = wrap.Questions
+		}
+	}
+	out := make([]QuizQuestion, 0, len(arr))
+	for _, q := range arr {
+		if strings.TrimSpace(q.Q) == "" || len(q.Choices) < 2 {
+			continue
+		}
+		if q.Answer < 0 || q.Answer >= len(q.Choices) {
+			q.Answer = 0
+		}
+		out = append(out, q)
+	}
+	if len(out) == 0 {
+		return nil, errors.New("could not parse the AI response as quiz questions")
+	}
+	return out, nil
+}
+
 // aiCallOpenAI calls an OpenAI-compatible chat-completions endpoint.
 func aiCallOpenAI(system, user, model string) (string, error) {
 	payload := map[string]interface{}{
