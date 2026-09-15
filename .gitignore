@@ -32,3 +32,5 @@ gophish
 
 # GishFlow deploy secrets
 deploy/.env
+# Local runtime config — holds YOUR own SES/AI/LINE/SMS credentials. Never commit.
+run-config.json
