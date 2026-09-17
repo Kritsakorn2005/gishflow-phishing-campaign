@@ -121,6 +121,7 @@ var statusMapping = {
     "Clicked Link": "clicked",
     "Submitted Data": "submitted_data",
     "Email Reported": "reported",
+    "QR Scanned": "qr_scanned",
 }
 
 // statusInfo safely looks up a status/event in the statuses map, returning a
@@ -667,6 +668,22 @@ function channelLabel(status) {
     return map[status] || status
 }
 
+// qrScannedCount returns how many distinct recipients reached the landing page
+// by scanning a QR code (a "QR Scanned" event). It backs the QR tile on the
+// results page, which is shown only for campaigns that actually had scans.
+function qrScannedCount() {
+    if (!campaign || !campaign.timeline) {
+        return 0
+    }
+    var seen = {}
+    $.each(campaign.timeline, function (i, e) {
+        if (e.message === "QR Scanned") {
+            seen[e.email || i] = true
+        }
+    })
+    return Object.keys(seen).length
+}
+
 // formatDuration turns a number of seconds into a compact "1m 30s" / "2h 5m".
 function formatDuration(s) {
     if (s === null || s === undefined) {
@@ -782,6 +799,8 @@ function poll() {
                     email_series_data[progressListing[i]]++
                 }
             })
+            email_series_data['QR Scanned'] = qrScannedCount()
+            if (email_series_data['QR Scanned'] > 0) { $('#qr_stat').show() } else { $('#qr_stat').hide() }
             $.each(email_series_data, function (status, count) {
                 var email_data = []
                 if (!(status in statusMapping)) {
@@ -972,6 +991,10 @@ function load() {
                 renderTimelineChart({
                     data: timeline_series_data
                 })
+                // GishFlow: QR scans are events (not a result status), so count
+                // them from the timeline and show the QR tile only when present.
+                email_series_data['QR Scanned'] = qrScannedCount()
+                if (email_series_data['QR Scanned'] > 0) { $('#qr_stat').show() } else { $('#qr_stat').hide() }
                 $.each(email_series_data, function (status, count) {
                     var email_data = []
                     if (!(status in statusMapping)) {

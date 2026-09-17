@@ -66,6 +66,10 @@
                 <div class="gf-stat-head"><span class="gf-dot" style="background:var(--gf-green)"></span>Reported</div>
                 <div id="reported_chart" class="gf-donut" style="height:170px;"></div>
             </div>
+            <div class="gf-stat" id="qr_stat" style="display:none;">
+                <div class="gf-stat-head"><span class="gf-dot" style="background:#5e5ce6"></span>QR Scanned</div>
+                <div id="qr_scanned_chart" class="gf-donut" style="height:170px;"></div>
+            </div>
         </div>
 
         <!-- Engagement timing -->
@@ -133,5 +137,5 @@
     <div id="flashes" class="row"></div>
 </div>
 {{end}} {{define "scripts"}}
-<script src="/js/dist/app/campaign_results.min.js"></script>
+<script src="/js/dist/app/campaign_results.min.js?v=qr1"></script>
 {{end}}
