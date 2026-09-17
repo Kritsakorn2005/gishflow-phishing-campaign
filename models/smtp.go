@@ -111,8 +111,13 @@ func (s *SMTP) Validate() error {
 		}
 		return nil
 	}
-	// An SMS channel needs an API key (Username) and secret (Password).
+	// An SMS channel needs an API key (Username) and secret (Password) for the
+	// ThaiBulkSMS API. A self-hosted gateway (Host is an HTTP URL) only needs
+	// that URL - its Basic-auth credentials are optional.
 	if s.Interface == InterfaceSMS {
+		if strings.HasPrefix(strings.ToLower(strings.TrimSpace(s.Host)), "http") {
+			return nil
+		}
 		if s.Username == "" || s.Password == "" {
 			return ErrSMSCredentialsNotSpecified
 		}
