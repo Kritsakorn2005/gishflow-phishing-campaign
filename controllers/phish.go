@@ -13,6 +13,7 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -27,6 +28,7 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/jordan-wright/unindexed"
+	qrcode "github.com/skip2/go-qrcode"
 )
 
 // ErrInvalidRequest is thrown when a request with an invalid structure is
@@ -121,6 +123,9 @@ func (ps *PhishingServer) registerRoutes() {
 	router.HandleFunc("/robots.txt", ps.RobotsHandler)
 	// GishFlow: LINE OA webhook — collects recipients' userIds automatically.
 	router.HandleFunc("/line/webhook", ps.LineWebhookHandler)
+	// GishFlow: hosted QR image, so QR codes in emails render in clients (e.g.
+	// Gmail) that strip inline data: images.
+	router.HandleFunc("/qr", ps.QRImageHandler)
 	router.HandleFunc("/{path:.*}/track", ps.TrackHandler)
 	router.HandleFunc("/{path:.*}/report", ps.ReportHandler)
 	router.HandleFunc("/report", ps.ReportHandler)
@@ -137,6 +142,27 @@ func (ps *PhishingServer) registerRoutes() {
 	// Setup logging
 	phishHandler = handlers.CombinedLoggingHandler(log.Writer(), phishHandler)
 	ps.server.Handler = phishHandler
+}
+
+// QRImageHandler renders a QR code PNG for the URL passed in the "u" query
+// parameter. It is public and does no tracking, so QR codes referenced from a
+// phishing email render even in clients that strip inline data: images (e.g.
+// Gmail). Only the image is returned; the scan itself is tracked when the
+// encoded URL is later visited.
+func (ps *PhishingServer) QRImageHandler(w http.ResponseWriter, r *http.Request) {
+	text := r.URL.Query().Get("u")
+	if _, err := url.ParseRequestURI(text); err != nil {
+		http.Error(w, "Missing or invalid 'u' parameter", http.StatusBadRequest)
+		return
+	}
+	png, err := qrcode.Encode(text, qrcode.Medium, 256)
+	if err != nil {
+		http.Error(w, "Failed to generate QR code", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "image/png")
+	w.Header().Set("Cache-Control", "public, max-age=86400")
+	w.Write(png)
 }
 
 // TrackHandler tracks emails as they are opened, updating the status for the given Result

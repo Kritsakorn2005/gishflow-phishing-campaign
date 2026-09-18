@@ -2,14 +2,10 @@ package models
 
 import (
 	"bytes"
-	"encoding/base64"
-	"fmt"
 	"net/mail"
 	"net/url"
 	"path"
 	"text/template"
-
-	qrcode "github.com/skip2/go-qrcode"
 )
 
 // TemplateContext is an interface that allows both campaigns and email
@@ -77,11 +73,14 @@ func NewPhishingTemplateContext(ctx TemplateContext, r BaseRecipient, rid string
 	qq := qrURL.Query()
 	qq.Set("qr", "1")
 	qrURL.RawQuery = qq.Encode()
-	qrCode := ""
-	if png, qrErr := qrcode.Encode(qrURL.String(), qrcode.Medium, 256); qrErr == nil {
-		qrCode = fmt.Sprintf("<img alt='' src='data:image/png;base64,%s'/>",
-			base64.StdEncoding.EncodeToString(png))
-	}
+	// GishFlow: reference the QR as a hosted image on the phishing server
+	// (baseURL/qr?u=...) instead of an inline data: URI, because Gmail (and some
+	// other clients) strip data: images. Fetching the image only renders the
+	// code; the scan is tracked when the encoded URL is actually visited.
+	qrImg, _ := url.Parse(baseURL.String())
+	qrImg.Path = path.Join(qrImg.Path, "/qr")
+	qrImg.RawQuery = url.Values{"u": {qrURL.String()}}.Encode()
+	qrCode := "<img alt='' src='" + qrImg.String() + "'/>"
 
 	return PhishingTemplateContext{
 		BaseRecipient: r,
