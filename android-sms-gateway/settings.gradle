@@ -1,0 +1,2 @@
+rootProject.name = "GishFlow SMS Gateway"
+include ':app'

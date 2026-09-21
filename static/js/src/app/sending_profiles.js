@@ -75,7 +75,9 @@ function save(idx) {
         profile.username = $("#line_secret").val()
     }
     // For an SMS channel: key -> username, secret -> password, sender -> from.
+    // Host is a self-hosted gateway URL (blank means "use ThaiBulkSMS").
     if (profile.interface_type === "SMS") {
+        profile.host = $("#sms_host").val()
         profile.username = $("#sms_key").val()
         profile.password = $("#sms_secret").val()
         profile.from_address = $("#sms_sender").val()
@@ -118,6 +120,7 @@ function dismiss() {
     $("#ignore_cert_errors").prop("checked", true)
     $("#line_token").val("")
     $("#line_secret").val("")
+    $("#sms_host").val("")
     $("#sms_key").val("")
     $("#sms_secret").val("")
     $("#sms_sender").val("")
@@ -198,6 +201,7 @@ function edit(idx) {
         $("#line_token").val(profile.interface_type === "LINE" ? profile.password : "")
         $("#line_secret").val(profile.interface_type === "LINE" ? profile.username : "")
         if (profile.interface_type === "SMS") {
+            $("#sms_host").val(profile.host)
             $("#sms_key").val(profile.username)
             $("#sms_secret").val(profile.password)
             $("#sms_sender").val(profile.from_address)
@@ -225,6 +229,7 @@ function copy(idx) {
     $("#line_token").val(profile.interface_type === "LINE" ? profile.password : "")
     $("#line_secret").val(profile.interface_type === "LINE" ? profile.username : "")
     if (profile.interface_type === "SMS") {
+        $("#sms_host").val(profile.host)
         $("#sms_key").val(profile.username)
         $("#sms_secret").val(profile.password)
         $("#sms_sender").val(profile.from_address)

@@ -52,7 +52,7 @@
                         <select class="form-control" id="interface_type">
                             <option value="SMTP">SMTP (Email)</option>
                             <option value="LINE">LINE (Messaging API)</option>
-                            <option value="SMS">SMS (ThaiBulkSMS)</option>
+                            <option value="SMS">SMS (ThaiBulkSMS / Self-hosted Gateway)</option>
                         </select>
                     </div>
                     <div id="smtp_fields">
@@ -112,16 +112,19 @@
                     </div>
                     <div id="sms_fields" style="display:none;">
                         <div class="form-group">
-                            <label class="control-label" for="sms_key">API Key:</label>
-                            <input type="text" class="form-control" id="sms_key" placeholder="ThaiBulkSMS API key" />
-                            <label class="control-label" for="sms_secret">API Secret:</label>
-                            <input type="password" class="form-control" id="sms_secret" placeholder="ThaiBulkSMS API secret" autocomplete="new-password" />
-                            <label class="control-label" for="sms_sender">Sender Name:</label>
+                            <label class="control-label" for="sms_host">Gateway URL <small class="text-muted">(leave blank for ThaiBulkSMS)</small>:</label>
+                            <input type="text" class="form-control" id="sms_host" placeholder="http://192.168.1.45:8080" />
+                            <p class="help-block">Leave blank to send through the ThaiBulkSMS API using the fields below. Fill in a <code>http://</code> URL to instead send for free through your own Android phone's SIM, using the <a href="https://github.com/capcom6/android-sms-gateway" target="_blank" rel="noopener">"SMS Gateway"</a> app in Local Server mode &mdash; the phone must be on the same Wi-Fi/LAN as this server, and the fields below become that app's Basic-auth credentials instead.</p>
+                            <label class="control-label" for="sms_key">API Key <small class="text-muted">/ Gateway Username</small>:</label>
+                            <input type="text" class="form-control" id="sms_key" placeholder="ThaiBulkSMS API key, or gateway app username" />
+                            <label class="control-label" for="sms_secret">API Secret <small class="text-muted">/ Gateway Password</small>:</label>
+                            <input type="password" class="form-control" id="sms_secret" placeholder="ThaiBulkSMS API secret, or gateway app password" autocomplete="new-password" />
+                            <label class="control-label" for="sms_sender">Sender Name <small class="text-muted">(ThaiBulkSMS only)</small>:</label>
                             <input type="text" class="form-control" id="sms_sender" placeholder="Registered sender name (e.g. GishFlow)" />
-                            <p class="help-block">From your ThaiBulkSMS account. The sender name must be pre-registered/approved. SMS is limited to ~160 characters, so keep the template text short.</p>
+                            <p class="help-block">The ThaiBulkSMS sender name must be pre-registered/approved. SMS is limited to ~160 characters, so keep the template text short.</p>
                             <div class="checkbox checkbox-primary">
                                 <input id="sms_mock" type="checkbox" checked>
-                                <label for="sms_mock">Mock mode &mdash; log only, don't actually send (no ThaiBulkSMS credits used). Turn off to send for real.</label>
+                                <label for="sms_mock">Mock mode &mdash; log only, don't actually send (no SMS credits/SIM used). Turn off to send for real.</label>
                             </div>
                         </div>
                     </div>

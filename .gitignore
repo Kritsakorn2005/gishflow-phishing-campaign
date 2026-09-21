@@ -34,3 +34,7 @@ gophish
 deploy/.env
 # Local runtime config — holds YOUR own SES/AI/LINE/SMS credentials. Never commit.
 run-config.json
+
+# Local dev server run logs
+run_stdout.log
+run_stderr.log
