@@ -103,12 +103,49 @@
                             <div class="col-sm-3">
                                 <label class="control-label" for="ai_quiz_model">โมเดล</label>
                                 <select id="ai_quiz_model" class="form-control" title="AI model">
-                                    <option value="claude-sonnet-5">Claude Sonnet 5</option>
-                                    <option value="gemini-3.7-flash">Gemini 3.7 Flash</option>
-                                    <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash Lite</option>
-                                    <option value="deepseek-v4-pro">DeepSeek v4 Pro</option>
-                                    <option value="llama-4-maverick">Llama 4 Maverick</option>
-                                    <option value="mistral-large-2512">Mistral Large</option>
+                                    <optgroup label="Claude">
+                                        <option value="claude-sonnet-5" selected>Claude Sonnet 5</option>
+                                    </optgroup>
+                                    <optgroup label="OpenAI">
+                                        <option value="gpt-5.6-luna">GPT-5.6 Luna</option>
+                                        <option value="gpt-5.6-terra">GPT-5.6 Terra</option>
+                                    </optgroup>
+                                    <optgroup label="Gemini">
+                                        <option value="gemini-3.8-flash">Gemini 3.8 Flash</option>
+                                        <option value="gemini-3.7-flash">Gemini 3.7 Flash</option>
+                                        <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash Lite</option>
+                                    </optgroup>
+                                    <optgroup label="DeepSeek">
+                                        <option value="deepseek-v4-pro">DeepSeek v4 Pro</option>
+                                        <option value="deepseek-v4-flash">DeepSeek v4 Flash</option>
+                                    </optgroup>
+                                    <optgroup label="Meta">
+                                        <option value="llama-4-maverick">Llama 4 Maverick</option>
+                                        <option value="llama-4-scout">Llama 4 Scout</option>
+                                    </optgroup>
+                                    <optgroup label="Mistral">
+                                        <option value="mistral-large-2512">Mistral Large</option>
+                                        <option value="mistral-medium-3">Mistral Medium 3</option>
+                                        <option value="mistral-small-2603">Mistral Small</option>
+                                    </optgroup>
+                                    <optgroup label="Qwen">
+                                        <option value="qwen3.7-max">Qwen 3.7 Max</option>
+                                        <option value="qwen3.7-plus">Qwen 3.7 Plus</option>
+                                        <option value="qwen3.6-flash">Qwen 3.6 Flash</option>
+                                    </optgroup>
+                                    <optgroup label="xAI">
+                                        <option value="grok-4.5">Grok 4.5</option>
+                                    </optgroup>
+                                    <optgroup label="MiniMax">
+                                        <option value="minimax-m3">MiniMax M3</option>
+                                    </optgroup>
+                                    <optgroup label="MoonshotAI">
+                                        <option value="kimi-k3">Kimi K3</option>
+                                    </optgroup>
+                                    <optgroup label="Nova (AWS)">
+                                        <option value="nova-pro-v1">Nova Pro</option>
+                                        <option value="nova-2-lite-v1">Nova 2 Lite</option>
+                                    </optgroup>
                                 </select>
                             </div>
                         </div>
