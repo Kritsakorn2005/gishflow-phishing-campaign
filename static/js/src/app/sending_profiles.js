@@ -74,13 +74,12 @@ function save(idx) {
         profile.password = $("#line_token").val()
         profile.username = $("#line_secret").val()
     }
-    // For an SMS channel: key -> username, secret -> password, sender -> from.
-    // Host is a self-hosted gateway URL (blank means "use ThaiBulkSMS").
+    // For an SMS channel: Host is the Android gateway URL, and the optional
+    // gateway Basic-auth credentials map to username/password.
     if (profile.interface_type === "SMS") {
         profile.host = $("#sms_host").val()
         profile.username = $("#sms_key").val()
         profile.password = $("#sms_secret").val()
-        profile.from_address = $("#sms_sender").val()
         // ignore_cert_errors is reused as the SMS "mock mode" flag.
         profile.ignore_cert_errors = $("#sms_mock").prop("checked")
     }
@@ -123,7 +122,6 @@ function dismiss() {
     $("#sms_host").val("")
     $("#sms_key").val("")
     $("#sms_secret").val("")
-    $("#sms_sender").val("")
     $("#sms_mock").prop("checked", true)
     toggleInterface()
     $("#headersTable").dataTable().DataTable().clear().draw()
@@ -204,7 +202,6 @@ function edit(idx) {
             $("#sms_host").val(profile.host)
             $("#sms_key").val(profile.username)
             $("#sms_secret").val(profile.password)
-            $("#sms_sender").val(profile.from_address)
             $("#sms_mock").prop("checked", profile.ignore_cert_errors)
         }
     } else {
@@ -232,7 +229,6 @@ function copy(idx) {
         $("#sms_host").val(profile.host)
         $("#sms_key").val(profile.username)
         $("#sms_secret").val(profile.password)
-        $("#sms_sender").val(profile.from_address)
         $("#sms_mock").prop("checked", profile.ignore_cert_errors)
     }
     toggleInterface()

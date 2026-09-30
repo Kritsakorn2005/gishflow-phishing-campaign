@@ -5,7 +5,7 @@
 
 > ⚠️ ส่งหา **เบอร์ผู้เข้าร่วมที่ยินยอมเท่านั้น** (authorized simulation / consented recipients)
 
-GishFlow จะส่งแบบนี้อัตโนมัติเมื่อ **Host** ของ SMS profile เป็น URL ขึ้นต้น `http` (ถ้าไม่ใช่ → ใช้ ThaiBulkSMS ตามเดิม)
+GishFlow ส่ง SMS ผ่าน Android gateway อย่างเดียว โดยใส่ URL ของแอป (ขึ้นต้น `http`) ในช่อง **Host** ของ SMS profile
 
 ---
 
@@ -65,7 +65,7 @@ Campaign: template นี้ · Sending Profile ที่สร้าง · grou
 ## เบื้องหลัง (สำหรับ dev)
 - GishFlow POST ไปที่ `Host` + `/message` พร้อม HTTP Basic auth (Username/Password) และ body
   `{"message": "...", "phoneNumbers": ["+66..."]}` — ตรงกับ Local Server API ของแอป capcom6
-- โค้ด: `models.SendSMSViaGateway` (เรียกจาก `worker.sendViaSMS` เมื่อ Host เป็น http)
+- โค้ด: `models.SendSMSViaGateway` (เรียกจาก `worker.sendViaSMS`)
 
 ## แก้ปัญหาที่เจอบ่อย
 - **ไม่ได้รับ SMS / error timeout** → มือถือกับคอมอยู่คนละ Wi-Fi, แอปปิด, หรือ firewall บล็อก → เช็ก IP ให้ตรง + ping ได้

@@ -2,7 +2,7 @@
 
 GishFlow เป็น fork ของ **Gophish** (phishing-simulation framework เขียนด้วย Go) ที่เพิ่มความสามารถสำหรับงานวิจัย/ฝึกอบรม:
 
-- **Multi-channel**: Email, SMS (ThaiBulkSMS), LINE (Official Account webhook เก็บ userId อัตโนมัติ), QR code
+- **Multi-channel**: Email, SMS (Android gateway), LINE (Official Account webhook เก็บ userId อัตโนมัติ), QR code
 - **AI**: สร้าง pretext + quiz อัตโนมัติ (OpenAI-compatible เช่น KKU IntelSphere)
 - **Analytics**: NIST Phish Scale, engagement timing, risk score + trend + time-decay, export PDF
 - **Teachable moment**: quiz + completion tracking
@@ -117,7 +117,7 @@ docker run --rm -v /tmp/ghfmt:/app -w /app golang:1.15.2 gofmt -l .   # ว่�
 ## 7. กฎห้ามแตะ (ไม่งั้นพัง) ⛔
 
 1. **ห้ามแก้ import path `github.com/gophish/gophish`** — เป็น module path build จะพังทันที
-2. **ห้าม commit credential ใดๆ** — SES key, LINE channel token, ThaiBulkSMS key, KKU api_key, AWS key ทั้งหมดอยู่ใน `run-config.json` (local, gitignore แล้ว) หรือกรอกผ่าน UI เท่านั้น
+2. **ห้าม commit credential ใดๆ** — SES key, LINE channel token, KKU api_key, AWS key ทั้งหมดอยู่ใน `run-config.json` (local, gitignore แล้ว) หรือกรอกผ่าน UI เท่านั้น
 3. **DB migrations = append-only** — เพิ่มไฟล์ใหม่ใน `db/db_sqlite3/` **และ** `db/db_mysql/` (goose) ห้ามแก้ของเก่า, ใส่ `DEFAULT ''` กัน NULL error
 4. เพิ่ม event/status ใหม่ ต้องเพิ่ม mapping ใน **ทั้ง** `static/js/src/app/dashboard.js` **และ** `campaign_results.js` (ไม่งั้นหน้าเว็บ crash `undefined.color`)
 
@@ -132,7 +132,7 @@ docker run --rm -v /tmp/ghfmt:/app -w /app golang:1.15.2 gofmt -l .   # ว่�
 | **AI** (pretext/quiz) | `ai` block ใน `run-config.json`: `base_url`, `api_key`, `model`, `provider` (OpenAI-compatible) |
 | **Email จริง** (Amazon SES) | Sending Profile: host `email-smtp.<region>.amazonaws.com:587`, SMTP user/pass; ตั้ง SPF/DKIM/DMARC ที่ DNS |
 | **LINE** | Sending Profile แบบ LINE + channel access token; ตั้ง webhook URL → `/line/webhook` |
-| **SMS** | Sending Profile แบบ SMS + ThaiBulkSMS key/secret |
+| **SMS** | Sending Profile แบบ SMS + Android gateway URL (แอป "SMS Gateway" โหมด Local Server) |
 | **Public URL** | Cloudflare Tunnel หรือ ngrok ชี้ไป `localhost:8080` |
 
 > ตอน dev ใช้ **MailHog** ส่งอีเมลได้เลยโดยไม่ต้องตั้ง SES (Sending Profile host = `mailhog:1025`)

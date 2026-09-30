@@ -78,13 +78,14 @@ const InterfaceLine = "LINE"
 var ErrLineTokenNotSpecified = errors.New("No LINE channel access token specified")
 
 // InterfaceSMS is the interface_type of a sending profile that delivers via
-// SMS (ThaiBulkSMS). The API key is stored in Username, the API secret in
-// Password, and the sender name in FromAddress.
+// SMS through a self-hosted Android SMS gateway. The gateway's HTTP endpoint
+// (http://<ip>:<port>) is stored in Host, and its optional Basic-auth
+// credentials in Username/Password.
 const InterfaceSMS = "SMS"
 
-// ErrSMSCredentialsNotSpecified is thrown when an SMS profile is missing its
-// API key or secret
-var ErrSMSCredentialsNotSpecified = errors.New("No SMS API key/secret specified")
+// ErrSMSGatewayNotSpecified is thrown when an SMS profile is missing its
+// Android gateway URL (Host must be an http(s) URL).
+var ErrSMSGatewayNotSpecified = errors.New("No SMS gateway URL specified")
 
 // TableName specifies the database tablename for Gorm to use
 func (s SMTP) TableName() string {
@@ -111,17 +112,14 @@ func (s *SMTP) Validate() error {
 		}
 		return nil
 	}
-	// An SMS channel needs an API key (Username) and secret (Password) for the
-	// ThaiBulkSMS API. A self-hosted gateway (Host is an HTTP URL) only needs
-	// that URL - its Basic-auth credentials are optional.
+	// An SMS channel delivers through a self-hosted Android SMS gateway, so it
+	// only needs the gateway's HTTP URL in Host - its Basic-auth credentials
+	// (Username/Password) are optional.
 	if s.Interface == InterfaceSMS {
 		if strings.HasPrefix(strings.ToLower(strings.TrimSpace(s.Host)), "http") {
 			return nil
 		}
-		if s.Username == "" || s.Password == "" {
-			return ErrSMSCredentialsNotSpecified
-		}
-		return nil
+		return ErrSMSGatewayNotSpecified
 	}
 	switch {
 	case s.FromAddress == "":

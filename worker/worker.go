@@ -208,18 +208,17 @@ func (w *DefaultWorker) sendViaLine(c models.Campaign, msc []mailer.Mail) {
 	}
 }
 
-// sendViaSMS delivers a batch of maillogs through the ThaiBulkSMS API. It
-// renders each recipient's message and sends it to their phone number, reusing
-// the existing result/maillog bookkeeping so tracking works as for email.
+// sendViaSMS delivers a batch of maillogs through a self-hosted Android SMS
+// gateway (a real SIM). It renders each recipient's message and sends it to
+// their phone number, reusing the existing result/maillog bookkeeping so
+// tracking works as for email.
 func (w *DefaultWorker) sendViaSMS(c models.Campaign, msc []mailer.Mail) {
-	apiKey := c.SMTP.Username
-	apiSecret := c.SMTP.Password
-	sender := c.SMTP.FromAddress
-	// GishFlow: when the Host is an HTTP(S) URL, the SMS is sent through a
-	// self-hosted Android SMS gateway (a real SIM) instead of the ThaiBulkSMS
-	// API. Username/Password are then the gateway app's Basic-auth credentials.
+	// GishFlow: SMS is sent through a self-hosted Android SMS gateway. Host is
+	// the gateway app's HTTP endpoint, and Username/Password its optional
+	// Basic-auth credentials.
 	gateway := strings.TrimSpace(c.SMTP.Host)
-	useGateway := strings.HasPrefix(strings.ToLower(gateway), "http")
+	username := c.SMTP.Username
+	password := c.SMTP.Password
 	// GishFlow: for SMS profiles the IgnoreCertErrors flag is reused as a
 	// "mock mode" switch - when on, we log the message and mark it sent without
 	// actually sending, so the flow can be tested without a SIM or credits.
@@ -250,12 +249,7 @@ func (w *DefaultWorker) sendViaSMS(c models.Campaign, msc []mailer.Mail) {
 			}
 			continue
 		}
-		var serr error
-		if useGateway {
-			serr = models.SendSMSViaGateway(gateway, apiKey, apiSecret, to, text)
-		} else {
-			serr = models.SendThaiBulkSMS(apiKey, apiSecret, sender, to, text)
-		}
+		serr := models.SendSMSViaGateway(gateway, username, password, to, text)
 		if serr != nil {
 			log.Error(serr)
 			m.Error(serr)
