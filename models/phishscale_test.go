@@ -62,3 +62,22 @@ func TestPhishScaleHard(t *testing.T) {
 		t.Error("personalized message should not flag a generic greeting")
 	}
 }
+
+// TestPhishScaleDifficultyMatrix verifies every cell of the detection-difficulty
+// matrix against the NIST Phish Scale (NIST TN 2276, Table 7). NIST lists the
+// Some/Weak cell as a "Moderately to Least" range; GishFlow takes the lower end
+// ("least").
+func TestPhishScaleDifficultyMatrix(t *testing.T) {
+	want := map[string]map[string]string{
+		"Few":  {"Low": "moderate", "Medium": "very", "High": "very"},
+		"Some": {"Low": "least", "Medium": "moderate", "High": "very"},
+		"Many": {"Low": "least", "Medium": "moderate", "High": "moderate"},
+	}
+	for cue, row := range want {
+		for premise, key := range row {
+			if _, got := psDifficulty(cue, premise); got != key {
+				t.Errorf("psDifficulty(%q, %q) = %q, want %q", cue, premise, got, key)
+			}
+		}
+	}
+}

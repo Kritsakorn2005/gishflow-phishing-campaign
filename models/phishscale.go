@@ -218,8 +218,10 @@ func psPremiseLevel(p int) string {
 }
 
 // psDifficulty combines cue count and premise alignment into a detection
-// difficulty, following the NIST Phish Scale: few cues + high alignment is the
-// hardest to detect; many cues + low alignment is the easiest.
+// difficulty, mirroring the NIST Phish Scale matrix (NIST TN 2276, Table 7):
+// few cues + high alignment is the hardest to detect, many cues + low alignment
+// the easiest. NIST lists the "Some cues / Weak premise" cell as a "Moderately
+// to Least" range; we take the lower end ("least").
 func psDifficulty(cueBucket, premiseLevel string) (string, string) {
 	matrix := map[string]map[string][2]string{
 		"Few": {
@@ -234,7 +236,7 @@ func psDifficulty(cueBucket, premiseLevel string) (string, string) {
 		},
 		"Many": {
 			"Low":    {"Least difficult to detect", "least"},
-			"Medium": {"Least difficult to detect", "least"},
+			"Medium": {"Moderate difficulty to detect", "moderate"},
 			"High":   {"Moderate difficulty to detect", "moderate"},
 		},
 	}
